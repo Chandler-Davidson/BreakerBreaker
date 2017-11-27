@@ -20,27 +20,75 @@ function scene:create( event )
 		local topWall = display.newRect( sceneGroup, _CX, -50, _W, 10 )
 		local bottomWall = display.newRect( sceneGroup, _CX, _H + 70, _W, 10 )
 
-		physics.addBody( leftWall, 'static', { bounce = 1 } )
-		physics.addBody( rightWall, 'static', { bounce = 1 } )
-		physics.addBody( topWall, 'static', { bounce = 1 } )
+		physics.addBody( leftWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
+		physics.addBody( rightWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
+		physics.addBody( topWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( bottomWall, 'static', { isSensor = true } )
 		bottomWall.tag = 'ballBounds'
- 
-	local block1 = Block:new()
-	block1:spawn()
 
-	block1:move()
+	-- GAME OBJECTS --
 
-	balls = {}
-	count = 1
-
-	timer.performWithDelay( 500, function (  )
-			table.insert(balls,  Ball:new())
-			balls[count]:spawn()
-			count = count + 1
-	end, 7 )
+		-- Holds alive blocks
+		local blocks = {}
 
 
+		-- Generate random, non repeating location
+		local randNumbers = {}
+		local tempNum
+
+		for i = 1, 6 do
+			repeat
+				tempNum = math.random( 1, 7 ) * 40
+
+				if ( table.indexOf( randNumbers, tempNum ) ) then
+				else
+					randNumbers[i] = tempNum
+				end
+
+			until randNumbers[i] ~= nil
+		end
+
+		for i=1, 6 do
+			table.insert( blocks, Block:new( ) )
+			blocks[i]:spawn(randNumbers[i])
+		end
+
+
+			-- table.insert( randNumbers, math.random( 1, 7 ) * 40 )
+
+			-- table.insert( blocks, Block:new( ) )
+			-- blocks[i]:spawn()
+
+		-- Move alive blocks, clear trash
+		timer.performWithDelay( 1500, function (  )
+			for i=1,#blocks do
+
+				-- If alive, move
+				if blocks[i] and blocks[i].shape then
+					blocks[i]:move()
+				else
+					-- Garbage collection
+					blocks[i] = nil
+				end
+			end
+		end, 3 )
+
+		-- Holds balls on screen, remove contents on next shot
+		local balls = {}
+		local ballCount = 1
+		timer.performWithDelay( 200, function (  )
+			-- Shoot balls
+			table.insert( balls, Ball:new() )
+			balls[ballCount]:spawn()
+			ballCount = ballCount + 1
+		end, 7 )
+
+		-- Loop through ensuring deletion
+		timer.performWithDelay( 5000, function (  )
+			for i=1,#blocks do
+				print( blocks[i] )
+			end
+		end )
 end
  
  

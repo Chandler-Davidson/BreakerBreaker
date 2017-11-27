@@ -26,16 +26,19 @@ local function onCollision( event )
 end
 
 function Ball:spawn( dx, dy, power )
-	self.shape = display.newCircle( display.contentCenterX, display.contentHeight, 20 )
+	self.shape = display.newCircle( display.contentCenterX, display.contentHeight, 15 )
 
-	physics.addBody( self.shape, 'dynamic' )
+	-- Define Ball's collision filter:
+		-- Cat. 1: Ball
+		-- Cat. 2: Blocks and Walls
+	physics.addBody( self.shape, 'dynamic', { filter = { categoryBits = 1, maskBits = 2 } } )
 	self.shape.tag = 'ball'
 	self.shape.parentObject = self
 	self.shape:addEventListener( 'collision', onCollision )
 	self.shape.isFixedRotation = true
 
 	-- Needs to be calculated
-	self.shape:setLinearVelocity( -400, -300 )
+	self.shape:setLinearVelocity( -100, -500 )
 end
 
 function Ball:remove(  )

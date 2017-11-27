@@ -24,10 +24,10 @@ local function onCollision( event )
 	end
 end
 
-function Block:spawn( )
+function Block:spawn( xPos )
 	-- local xPos = math.random( 1, 7 ) * 40
-	local xPos = 1 * 40
-	print( xPos )
+	-- local xPos = 1 * 40
+	print( 'New Block Pos: ' .. xPos )
 
 	self.shape = display.newRect( xPos, 0, 40, 40 )
 	self.shape:setFillColor( 1, 0, 0 )
@@ -37,7 +37,7 @@ function Block:spawn( )
 		font = native.systemFontBold,
 		fontSize = 35 } )
 
-	physics.addBody( self.shape, 'kinematic' )
+	physics.addBody( self.shape, 'kinematic', { filter = { categoryBits = 2, maskBits = 1 }, bounce = 1 } )
 	self.shape.tag = 'block'
 	self.shape.parentObject = self
 	self.shape:addEventListener( 'collision', onCollision )
