@@ -2,7 +2,7 @@ local physics = require('physics')
 physics.start( )
 physics.setGravity( 0, 0 ) 
 
-local Ball = { comboCounter = 0 }
+local Ball = { }
 
 function Ball:new ( obj )
 	obj = obj or {}
@@ -14,8 +14,6 @@ end
 local function onCollision( event )
 	if ( event.phase == 'began' ) then
 		if ( event.other.tag == 'block' ) then
-
-			event.target.parentObject.comboCounter = event.target.parentObject.comboCounter + 1
 		
 		elseif ( event.other.tag == 'ballBounds' ) then
 
@@ -38,7 +36,8 @@ function Ball:spawn( dx, dy, power )
 	self.shape.isFixedRotation = true
 
 	-- Needs to be calculated
-	self.shape:setLinearVelocity( -100, -500 )
+	-- self.shape:setLinearVelocity( -100, -500 )
+	self.shape:setLinearVelocity( dx, dy )
 end
 
 function Ball:remove(  )

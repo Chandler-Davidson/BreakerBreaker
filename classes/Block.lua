@@ -2,8 +2,6 @@ local physics = require('physics')
 physics.start( )
 physics.setGravity( 0, 0 )
 
-local physics = require('physics')
-
 local Block = { hitPoints = 5 }
 
 function Block:new( obj )
@@ -27,10 +25,11 @@ end
 function Block:spawn( xPos )
 	-- local xPos = math.random( 1, 7 ) * 40
 	-- local xPos = 1 * 40
-	print( 'New Block Pos: ' .. xPos )
+	print( '\tNew Block xPos: ' .. xPos )
 
 	self.shape = display.newRect( xPos, 0, 40, 40 )
 	self.shape:setFillColor( 1, 0, 0 )
+	self.shape.strokeWidth = 1
 	self.shapeHealth = display.newText( {
 		text = self.hitPoints,
 		x = self.shape.x, y = self.shape.y,

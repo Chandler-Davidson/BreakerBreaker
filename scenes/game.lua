@@ -1,9 +1,13 @@
 local Block = require('classes.Block')
 local Ball = require('classes.Ball')
+local BlockFactory = require('classes.BlockFactory')
+local Pickup = require('classes.Pickup')
 
 local composer = require( "composer" )
  
 local scene = composer.newScene()
+
+local ammoCount = 7
 
 -- create()
 function scene:create( event )
@@ -13,7 +17,7 @@ function scene:create( event )
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
 
 
-	-- ENVIROMENT -- 
+	-- ENVIROMENT --
 		-- Walls --
 		local leftWall = display.newRect( sceneGroup, -5, _CY, 10, _H )
 		local rightWall = display.newRect( sceneGroup, _W + 5, _CY, 10, _H )
@@ -28,67 +32,66 @@ function scene:create( event )
 
 	-- GAME OBJECTS --
 
-		-- Holds alive blocks
-		local blocks = {}
-
-
-		-- Generate random, non repeating location
-		local randNumbers = {}
-		local tempNum
-
-		for i = 1, 6 do
-			repeat
-				tempNum = math.random( 1, 7 ) * 40
-
-				if ( table.indexOf( randNumbers, tempNum ) ) then
-				else
-					randNumbers[i] = tempNum
-				end
-
-			until randNumbers[i] ~= nil
-		end
-
-		for i=1, 6 do
-			table.insert( blocks, Block:new( ) )
-			blocks[i]:spawn(randNumbers[i])
-		end
-
-
-			-- table.insert( randNumbers, math.random( 1, 7 ) * 40 )
-
-			-- table.insert( blocks, Block:new( ) )
-			-- blocks[i]:spawn()
-
-		-- Move alive blocks, clear trash
-		timer.performWithDelay( 1500, function (  )
-			for i=1,#blocks do
-
-				-- If alive, move
-				if blocks[i] and blocks[i].shape then
-					blocks[i]:move()
-				else
-					-- Garbage collection
-					blocks[i] = nil
-				end
-			end
-		end, 3 )
+		blockFactory = BlockFactory:new()
+		blockFactory:spawn()
+		blockFactory:spawnBlocks(4)
 
 		-- Holds balls on screen, remove contents on next shot
-		local balls = {}
-		local ballCount = 1
-		timer.performWithDelay( 200, function (  )
-			-- Shoot balls
-			table.insert( balls, Ball:new() )
-			balls[ballCount]:spawn()
-			ballCount = ballCount + 1
-		end, 7 )
+		-- timer.performWithDelay( 200, function (  )
+		-- 	-- Shoot balls
+		-- 	local tempBall = Ball:new()
+		-- 	tempBall:spawn()
+		-- end, ammoCount )
 
-		-- Loop through ensuring deletion
-		timer.performWithDelay( 5000, function (  )
-			for i=1,#blocks do
-				print( blocks[i] )
-			end
+		timer.performWithDelay( 2000, function (  )
+			blockFactory:moveBlocks()
+			blockFactory:spawnBlocks(5)
+
+			timer.performWithDelay( 200, function (  )
+			-- Shoot balls
+			local tempBall = Ball:new()
+			tempBall:spawn()
+		end, ammoCount )
 		end )
+
+		local pickup = Pickup:new()
+		pickup:spawn( self )
+
+		local function shoot( event )
+			if event.phase == 'began' then
+
+			elseif event.phase == 'ended' then
+				-- deltaX = event.x - _CX 
+				-- deltaY = event.y - _CY - 100
+
+				deltaX = _CX - event.x
+				deltaY = _CY + 200 - event.y
+
+
+				normDeltaX = deltaX / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
+				normDeltaY = deltaY / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
+				local speed = 500
+
+				timer.performWithDelay( 200, function (  )
+					local tempBall = Ball:new()
+					tempBall:spawn( normDeltaX * speed, normDeltaY * speed )
+				end, ammoCount )
+ 
+			end
+
+			
+		end
+
+		Runtime:addEventListener( 'touch', shoot )
+end
+
+function scene:applyPickup( pickupType )
+	print( 'Picked up: ' .. pickupType )
+
+	if pickupType == 'Ball' then
+		ammoCount = ammoCount + 1
+		print( '\tNew ammoCount: ' .. ammoCount )
+	end
 end
  
  
