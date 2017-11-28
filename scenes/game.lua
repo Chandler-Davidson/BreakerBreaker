@@ -7,7 +7,7 @@ local composer = require( "composer" )
  
 local scene = composer.newScene()
 
-local ammoCount = 7
+local ammoCount = 1
 
 -- create()
 function scene:create( event )
@@ -19,8 +19,8 @@ function scene:create( event )
 
 	-- ENVIROMENT --
 		-- Walls --
-		local leftWall = display.newRect( sceneGroup, -5, _CY, 10, _H )
-		local rightWall = display.newRect( sceneGroup, _W + 5, _CY, 10, _H )
+		local leftWall = display.newRect( sceneGroup, -5, _CY, 10, _H + 100 )
+		local rightWall = display.newRect( sceneGroup, _W + 5, _CY, 10, _H + 100 )
 		local topWall = display.newRect( sceneGroup, _CX, -50, _W, 10 )
 		local bottomWall = display.newRect( sceneGroup, _CX, _H + 70, _W, 10 )
 
@@ -35,29 +35,22 @@ function scene:create( event )
 		blockFactory = BlockFactory:new()
 		blockFactory:spawn()
 		blockFactory:spawnBlocks(4)
+		blockFactory:moveBlocks()
 
-		-- Holds balls on screen, remove contents on next shot
-		-- timer.performWithDelay( 200, function (  )
-		-- 	-- Shoot balls
-		-- 	local tempBall = Ball:new()
-		-- 	tempBall:spawn()
-		-- end, ammoCount )
+		Pickup:new():spawn( self )
 
-		timer.performWithDelay( 2000, function (  )
-			blockFactory:moveBlocks()
-			blockFactory:spawnBlocks(5)
 
-			timer.performWithDelay( 200, function (  )
-			-- Shoot balls
-			local tempBall = Ball:new()
-			tempBall:spawn()
-		end, ammoCount )
-		end )
-
-		local pickup = Pickup:new()
-		pickup:spawn( self )
+		local reticleLine
 
 		local function shoot( event )
+
+			if reticleLine then
+				reticleLine:removeSelf( )
+			end
+
+			reticleLine = display.newLine( _CX, _CY + 250, event.x, event.y )
+
+
 			if event.phase == 'began' then
 
 			elseif event.phase == 'ended' then
@@ -70,16 +63,22 @@ function scene:create( event )
 
 				normDeltaX = deltaX / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
 				normDeltaY = deltaY / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
-				local speed = 500
+				local speed = -500
 
 				timer.performWithDelay( 200, function (  )
 					local tempBall = Ball:new()
 					tempBall:spawn( normDeltaX * speed, normDeltaY * speed )
 				end, ammoCount )
+
+				reticleLine:removeSelf( )
+				reticleLine = nil
+
+				blockFactory:spawnBlocks(3)
+				blockFactory:moveBlocks()
+
+				Pickup:new():spawn( self )
  
 			end
-
-			
 		end
 
 		Runtime:addEventListener( 'touch', shoot )

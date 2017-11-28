@@ -11,13 +11,22 @@ function Pickup:new( obj )
 end
 
 local function onCollision( event )
+
+	local self = event.target.parentObject
+
 	if ( event.phase == 'began' ) then
 
 		if ( event.other.tag == 'ball' ) then
 
-			event.target.parentObject.scene:applyPickup( event.target.parentObject.pickupType )
+			self.scene:applyPickup( self.pickupType )
 
-			event.target.parentObject:remove()
+			local notification = display.newText( '+1 Ball', self.shape.x, self.shape.y, native.systemFontBold, 20 )
+			notification.alpha = 0
+			transition.to( notification, { time = 400, alpha = .7, onComplete = function (  )
+				transition.to( notification, { time = 400, alpha = 0 } )
+			end } )
+			
+			self:remove()
 
 		end
 	end
