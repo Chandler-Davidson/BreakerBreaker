@@ -29,14 +29,17 @@ function Block:spawn( xPos )
 
 	self.shape = display.newRect( xPos, 0, 40, 40 )
 	self.shape:setFillColor( 1, 0, 0 )
-	self.shape.strokeWidth = 1
+	self.shape.strokeWidth = 5
+	self.shape:setStrokeColor( 0 )
 	self.shapeHealth = display.newText( {
 		text = self.hitPoints,
 		x = self.shape.x, y = self.shape.y,
 		font = native.systemFontBold,
 		fontSize = 35 } )
-
-	physics.addBody( self.shape, 'kinematic', { filter = { categoryBits = 2, maskBits = 1 }, bounce = 1 } )
+	-- Define Ball's collision filter:
+		-- Cat. 2: Block
+		-- Collides with: 1 (balls) + 4 (pickups)
+	physics.addBody( self.shape, 'kinematic', { filter = { categoryBits = 2, maskBits = 5 }, bounce = 1 } )
 	self.shape.tag = 'block'
 	self.shape.parentObject = self
 	self.shape:addEventListener( 'collision', onCollision )

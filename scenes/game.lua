@@ -7,9 +7,22 @@ local composer = require( "composer" )
  
 local scene = composer.newScene()
 
+-- Count of shots in player's inventory
 local ammoCount = 1
 
--- create()
+-- Only allow a single shot on screen at a time
+local ballFired = 0;		-- ammoCount at time of release (ammoCount changes w/ pickups)
+local ballsReturned = 0		-- count of balls returned during shot
+local readyToFire = true 	-- is cannon ready to fire again?
+
+local function startNewWave(  )
+	timer.performWithDelay( 10, function (  )
+		blockFactory:spawnBlocks(3)
+	blockFactory:moveBlocks()
+	end )
+	
+end
+
 function scene:create( event )
 	local sceneGroup = self.view
 
@@ -27,8 +40,22 @@ function scene:create( event )
 		physics.addBody( leftWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( rightWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( topWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
-		physics.addBody( bottomWall, 'static', { isSensor = true } )
+		physics.addBody( bottomWall, 'static', { isSensor = false, filter = { categoryBits = 2, maskBits = 1 } } )
 		bottomWall.tag = 'ballBounds'
+		bottomWall:addEventListener( 'collision', function (  )
+			ballsReturned = ballsReturned + 1
+
+			print( 'collected ball #' .. ballsReturned )
+
+			if (ballsReturned >= ballFired) then
+				print( 'all balls collected' )
+
+				ballsReturned = 0
+				readyToFire = true;
+
+				startNewWave()
+			end
+		end )
 
 	-- GAME OBJECTS --
 
@@ -54,8 +81,8 @@ function scene:create( event )
 			if event.phase == 'began' then
 
 			elseif event.phase == 'ended' then
-				-- deltaX = event.x - _CX 
-				-- deltaY = event.y - _CY - 100
+				
+				readyToFire = false
 
 				deltaX = _CX - event.x
 				deltaY = _CY + 200 - event.y
@@ -65,6 +92,8 @@ function scene:create( event )
 				normDeltaY = deltaY / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
 				local speed = -500
 
+				ballFired = ammoCount
+
 				timer.performWithDelay( 200, function (  )
 					local tempBall = Ball:new()
 					tempBall:spawn( normDeltaX * speed, normDeltaY * speed )
@@ -73,15 +102,18 @@ function scene:create( event )
 				reticleLine:removeSelf( )
 				reticleLine = nil
 
-				blockFactory:spawnBlocks(3)
-				blockFactory:moveBlocks()
-
 				Pickup:new():spawn( self )
  
 			end
 		end
 
-		Runtime:addEventListener( 'touch', shoot )
+		Runtime:addEventListener( 'touch', function ( event )
+
+			if (readyToFire) then
+				shoot( event );
+			end
+
+		end )
 end
 
 function scene:applyPickup( pickupType )
@@ -110,7 +142,6 @@ function scene:show( event )
 end
 
  
--- hide()
 function scene:hide( event )
  
 	local sceneGroup = self.view
@@ -126,15 +157,14 @@ function scene:hide( event )
 end
  
  
--- destroy()
 function scene:destroy( event )
  
 	local sceneGroup = self.view
 	-- Code here runs prior to the removal of scene's view
  
 end
- 
- 
+
+
 -- -----------------------------------------------------------------------------------
 -- Scene event function listeners
 -- -----------------------------------------------------------------------------------
