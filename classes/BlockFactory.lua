@@ -14,8 +14,8 @@ function BlockFactory:spawn(  )
 	self.blocks = {} -- Hold alive blocks
 end
 
-function BlockFactory:spawnBlocks( numBlocks )
-	print( 'Spawning Blocks:' )
+function BlockFactory:spawnBlocks( numBlocks, difficulty )
+	print( '  Spawning Blocks:' )
 
 		-- Generate random, non repeating locations
 
@@ -34,7 +34,7 @@ function BlockFactory:spawnBlocks( numBlocks )
 					randNumbers[i] = tempNum
 
 					-- Spawn a new block, then insert into table
-					local tempBlock = Block:new()
+					local tempBlock = Block:new( { hitPoints = difficulty + math.random( 1, 5 ) } )
 					tempBlock:spawn( randNumbers[i] )
 					table.insert( self.blocks, tempBlock )
 

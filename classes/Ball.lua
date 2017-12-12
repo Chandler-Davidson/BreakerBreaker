@@ -1,6 +1,5 @@
 local physics = require('physics')
 physics.start( )
-physics.setGravity( 0, 0 ) 
 
 local Ball = { }
 
@@ -12,7 +11,7 @@ function Ball:new ( obj )
 end
 
 local function onCollision( event )
-	if ( event.phase == 'ended' ) then
+	if ( event.phase == 'began' ) then
 		if ( event.other.tag == 'ballBounds' ) then
 
 			event.target.parentObject:remove()
@@ -32,6 +31,7 @@ function Ball:spawn( dx, dy, power )
 	self.shape.parentObject = self
 	self.shape:addEventListener( 'collision', onCollision )
 	self.shape.isFixedRotation = true
+	self.shape.gravityScale = 0
 
 	-- Needs to be calculated
 	-- self.shape:setLinearVelocity( -100, -500 )
@@ -42,8 +42,6 @@ function Ball:remove(  )
 	self.shape:removeSelf( )
 	self.shape = nil
 	self = nil
-
-	print( 'Ball removed' )
 end
 
 return Ball

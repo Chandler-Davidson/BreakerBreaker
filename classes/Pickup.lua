@@ -23,7 +23,7 @@ local function onCollision( event )
 			self:remove()
 
 		elseif ( event.other.tag == 'block' ) then
-			print( 'hit block' )
+			print( '**Pickup removed, due to collision with block' )
 			self:remove()
 		end
 	end
@@ -35,7 +35,8 @@ function Pickup:spawn( scene )
 	local xPos = math.random( 1, 7 ) * 40
 	local yPos = math.random( 1, 10 ) * 40
 
-	print( 'New Pickup Pos: ' .. xPos, yPos )
+	print( '  Spawning Pickup: ' )
+	print( '\tNew ' .. self.pickupType .. ' Pickup' )
 
 	self.shape = display.newCircle( xPos, yPos, 15 )
 

@@ -1,6 +1,6 @@
 local physics = require('physics')
+local timer = require('timer')
 physics.start( )
-physics.setGravity( 0, 0 )
 
 local Block = { hitPoints = 5 }
 
@@ -25,7 +25,7 @@ end
 function Block:spawn( xPos )
 	-- local xPos = math.random( 1, 7 ) * 40
 	-- local xPos = 1 * 40
-	print( '\tNew Block xPos: ' .. xPos )
+	print( '\tNew Block HP: ' .. self.hitPoints )
 
 	self.shape = display.newRect( xPos, 0, 40, 40 )
 	self.shape:setFillColor( 1, 0, 0 )
@@ -40,6 +40,7 @@ function Block:spawn( xPos )
 		-- Cat. 2: Block
 		-- Collides with: 1 (balls) + 4 (pickups)
 	physics.addBody( self.shape, 'kinematic', { filter = { categoryBits = 2, maskBits = 5 }, bounce = 1 } )
+	self.shape.gravityScale = 0
 	self.shape.tag = 'block'
 	self.shape.parentObject = self
 	self.shape:addEventListener( 'collision', onCollision )

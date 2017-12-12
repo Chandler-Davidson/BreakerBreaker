@@ -7,6 +7,8 @@ local composer = require( "composer" )
  
 local scene = composer.newScene()
 
+local roundCount = 1
+
 -- Count of shots in player's inventory
 local ammoCount = 1
 
@@ -16,11 +18,22 @@ local ballsReturned = 0		-- count of balls returned during shot
 local readyToFire = true 	-- is cannon ready to fire again?
 
 local function startNewWave(  )
+	print( 'Starting Round: ' .. roundCount )
 	timer.performWithDelay( 10, function (  )
-		blockFactory:spawnBlocks(3)
-	blockFactory:moveBlocks()
-	end )
-	
+		-- Short timer allows collision to end
+
+		local blockCount
+
+		if roundCount > 7 then
+			blockCount = 7
+		end
+
+		blockFactory:spawnBlocks(roundCount, roundCount)
+		blockFactory:moveBlocks()
+		Pickup:new():spawn( scene )
+
+		roundCount = roundCount + 1
+	end )	
 end
 
 function scene:create( event )
@@ -42,26 +55,29 @@ function scene:create( event )
 		physics.addBody( topWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( bottomWall, 'static', { isSensor = false, filter = { categoryBits = 2, maskBits = 1 } } )
 		bottomWall.tag = 'ballBounds'
-		bottomWall:addEventListener( 'collision', function (  )
-			ballsReturned = ballsReturned + 1
 
-			print( 'collected ball #' .. ballsReturned )
+		local function ballListener( event )
+			if (event.other.tag == 'ball') then
 
-			if (ballsReturned >= ballFired) then
-				print( 'all balls collected' )
+				ballsReturned = ballsReturned + 1
 
-				ballsReturned = 0
-				readyToFire = true;
+				if (ballsReturned >= ballFired) then
 
-				startNewWave()
+					ballsReturned = 0
+					readyToFire = true;
+
+					startNewWave()
+				end
 			end
-		end )
+		end
+
+		bottomWall:addEventListener( 'collision', ballListener)
 
 	-- GAME OBJECTS --
 
 		blockFactory = BlockFactory:new()
 		blockFactory:spawn()
-		blockFactory:spawnBlocks(4)
+		blockFactory:spawnBlocks(4, roundCount)
 		blockFactory:moveBlocks()
 
 		Pickup:new():spawn( self )
@@ -100,10 +116,7 @@ function scene:create( event )
 				end, ammoCount )
 
 				reticleLine:removeSelf( )
-				reticleLine = nil
-
-				Pickup:new():spawn( self )
- 
+				reticleLine = nil 
 			end
 		end
 
@@ -117,7 +130,7 @@ function scene:create( event )
 end
 
 function scene:applyPickup( pickupType )
-	print( 'Picked up: ' .. pickupType )
+	print( '  Applied ' .. pickupType .. ' pickup' )
 
 	if pickupType == 'Ball' then
 		ammoCount = ammoCount + 1
