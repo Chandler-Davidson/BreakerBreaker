@@ -56,16 +56,19 @@ function scene:create( event )
 		physics.addBody( bottomWall, 'static', { isSensor = false, filter = { categoryBits = 2, maskBits = 1 } } )
 		bottomWall.tag = 'ballBounds'
 
+		-- Collects all returning balls
 		local function ballListener( event )
 			if (event.other.tag == 'ball') then
 
 				ballsReturned = ballsReturned + 1
 
+				-- Ensures all are collected before play
 				if (ballsReturned >= ballFired) then
 
 					ballsReturned = 0
 					readyToFire = true;
 
+					-- Create new blocks
 					startNewWave()
 				end
 			end
@@ -80,50 +83,72 @@ function scene:create( event )
 		blockFactory:spawnBlocks(4, roundCount)
 		blockFactory:moveBlocks()
 
+		Pickup:new( { pickupType = 'Shockwave', color = { 1, 0, 0 }, notification = 'BooM!'} ):spawn( self )
+
 		Pickup:new():spawn( self )
 
 
-		local reticleLine
+		local reticleLine -- Var for displayObj
 
-		local function shoot( event )
+		local function drawReticle( x, y )
 
+			-- Clean any prexisting reticle
 			if reticleLine then
-				reticleLine:removeSelf( )
+				 reticleLine:removeSelf( )
 			end
 
-			reticleLine = display.newLine( _CX, _CY + 250, event.x, event.y )
+			-- Draw a line from the 'cannon' to the cursor
+			reticleLine = display.newLine( _CX, _CY + 250, x, y )
+		end
 
+		local function removeRecticle(  )
+			reticleLine:removeSelf( )
+			reticleLine = nil
+		end
 
-			if event.phase == 'began' then
+		local function shoot( x, y )
+			-- Disable fire until next wave
+			readyToFire = false
 
-			elseif event.phase == 'ended' then
-				
-				readyToFire = false
+			-- Calculate shot's trajectory
+			deltaX = _CX - x
+			deltaY = _CY + 200 - y
 
-				deltaX = _CX - event.x
-				deltaY = _CY + 200 - event.y
+			normDeltaX = deltaX / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
+			normDeltaY = deltaY / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
+			local speed = -500	-- Ball speed strictly aesthetic
 
+			ballFired = ammoCount	-- Keep track of ballsFired, because ammoCount can change mid-wave
 
-				normDeltaX = deltaX / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
-				normDeltaY = deltaY / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
-				local speed = -500
-
-				ballFired = ammoCount
-
-				timer.performWithDelay( 200, function (  )
-					local tempBall = Ball:new()
-					tempBall:spawn( normDeltaX * speed, normDeltaY * speed )
-				end, ammoCount )
-
-				reticleLine:removeSelf( )
-				reticleLine = nil 
-			end
+			-- Loop through firiing each ball
+			timer.performWithDelay( 200, function (  )
+				local tempBall = Ball:new()
+				tempBall:spawn( normDeltaX * speed, normDeltaY * speed )
+			end, ammoCount )
 		end
 
 		Runtime:addEventListener( 'touch', function ( event )
 
-			if (readyToFire) then
-				shoot( event );
+			if ( readyToFire ) then
+
+				drawReticle( event.x, event.y )
+
+				if event.phase == 'ended' then
+
+					-- Calc distance of reticleLine
+					local distance = math.sqrt( 
+						math.pow( _CX - event.x, 2 ) + 
+						math.pow( _CY + 250 - event.y, 2 ) )
+
+					-- Allows cancelling shots
+					if ( distance > 150 ) then
+						shoot( event.x , event.y )
+					end
+
+					-- Clean reticle
+					removeRecticle()
+
+				end
 			end
 
 		end )
@@ -132,9 +157,15 @@ end
 function scene:applyPickup( pickupType )
 	print( '  Applied ' .. pickupType .. ' pickup' )
 
+	-- Allows for implementation of alt pickups later
+	-- Apply game logic on pickup's desc.
 	if pickupType == 'Ball' then
 		ammoCount = ammoCount + 1
 		print( '\tNew ammoCount: ' .. ammoCount )
+
+	elseif pickupType == 'Shockwave' then
+		blockFactory:hitAll(1)
+		print('\tAll blocks hit for: 1')
 	end
 end
  

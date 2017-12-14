@@ -1,7 +1,7 @@
 local physics = require('physics')
 physics.start( )
 
-local Pickup = { pickupType = 'Ball' }
+local Pickup = { pickupType = 'Ball', color = { 0, 0, 1 }, notification = '+1 Ball' }
 
 function Pickup:new( obj )
 	obj = obj or {}
@@ -40,7 +40,7 @@ function Pickup:spawn( scene )
 
 	self.shape = display.newCircle( xPos, yPos, 15 )
 
-	self.shape:setFillColor( 0, 0, 1 )
+	self.shape:setFillColor( unpack( self.color ) )
 	self.shape.strokeWidth = 1
 
 	-- Define Ball's collision filter:
@@ -59,7 +59,7 @@ function Pickup:spawn( scene )
 end
 
 function Pickup:displayNotification(  )
-	local notification = display.newText( '+1 Ball', self.shape.x, self.shape.y, native.systemFontBold, 20 )
+	local notification = display.newText( self.notification, self.shape.x, self.shape.y, native.systemFontBold, 20 )
 	notification.alpha = 0
 
 	transition.to( notification, { time = 400, alpha = .7, onComplete = function (  )

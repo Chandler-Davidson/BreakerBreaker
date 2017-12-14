@@ -72,4 +72,14 @@ function BlockFactory:moveBlocks( )
 	self:refactor()
 end
 
+function BlockFactory:hitAll( hitPoints )
+	for j = 1, hitPoints do
+		for i = 1, #self.blocks do
+			if self.blocks[i] then
+				self.blocks[i]:hit()
+			end
+		end
+	end
+end
+
 return BlockFactory

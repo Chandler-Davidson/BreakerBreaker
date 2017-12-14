@@ -33,7 +33,7 @@ function Block:spawn( xPos )
 	self.shape:setStrokeColor( 0 )
 	self.shapeHealth = display.newText( {
 		text = self.hitPoints,
-		x = self.shape.x, y = self.shape.y,
+		x = self.shape.x, y = self.shape.y - 2,
 		font = native.systemFontBold,
 		fontSize = 35 } )
 	-- Define Ball's collision filter:
