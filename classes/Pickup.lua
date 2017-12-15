@@ -23,7 +23,7 @@ local function onCollision( event )
 			self:remove()
 
 		elseif ( event.other.tag == 'block' ) then
-			print( '**Pickup removed, due to collision with block' )
+			print( '\t**Pickup removed, due to collision with block**' )
 			self:remove()
 		end
 	end

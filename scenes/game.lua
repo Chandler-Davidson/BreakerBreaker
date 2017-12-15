@@ -1,21 +1,18 @@
+local Cannon = require('classes.Cannon')
 local Block = require('classes.Block')
 local Ball = require('classes.Ball')
-local BlockFactory = require('classes.BlockFactory')
+local BlockFactory = require('classes.BlockFactory'):new()
 local Pickup = require('classes.Pickup')
 
 local composer = require( "composer" )
  
 local scene = composer.newScene()
 
-local roundCount = 1
-
--- Count of shots in player's inventory
-local ammoCount = 1
+local roundCount = 1 -- Track each wave's progression
 
 -- Only allow a single shot on screen at a time
 local ballFired = 0;		-- ammoCount at time of release (ammoCount changes w/ pickups)
 local ballsReturned = 0		-- count of balls returned during shot
-local readyToFire = true 	-- is cannon ready to fire again?
 
 local function startNewWave(  )
 	print( 'Starting Round: ' .. roundCount )
@@ -24,12 +21,14 @@ local function startNewWave(  )
 
 		local blockCount
 
-		if roundCount > 7 then
+		if roundCount < 7 then
+			blockCount = roundCount
+		else
 			blockCount = 7
 		end
 
-		blockFactory:spawnBlocks(roundCount, roundCount)
-		blockFactory:moveBlocks()
+		BlockFactory:spawnBlocks(blockCount, roundCount)
+		BlockFactory:moveBlocks()
 		Pickup:new():spawn( scene )
 
 		roundCount = roundCount + 1
@@ -41,7 +40,6 @@ function scene:create( event )
 
 	-- Commonly used coordinates
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
-
 
 	-- ENVIROMENT --
 		-- Walls --
@@ -66,7 +64,7 @@ function scene:create( event )
 				if (ballsReturned >= ballFired) then
 
 					ballsReturned = 0
-					readyToFire = true;
+					Cannon:setReadyToFire( true );
 
 					-- Create new blocks
 					startNewWave()
@@ -78,80 +76,19 @@ function scene:create( event )
 
 	-- GAME OBJECTS --
 
-		blockFactory = BlockFactory:new()
-		blockFactory:spawn()
-		blockFactory:spawnBlocks(4, roundCount)
-		blockFactory:moveBlocks()
+		BlockFactory:spawn()
+		
+		startNewWave()
 
 		Pickup:new( { pickupType = 'Shockwave', color = { 1, 0, 0 }, notification = 'BooM!'} ):spawn( self )
 
-		Pickup:new():spawn( self )
+		-- Cannon is a singleton
+		Cannon:spawn( scene )
+		Cannon:setReadyToFire( true ) -- Enable fire
+end
 
-
-		local reticleLine -- Var for displayObj
-
-		local function drawReticle( x, y )
-
-			-- Clean any prexisting reticle
-			if reticleLine then
-				 reticleLine:removeSelf( )
-			end
-
-			-- Draw a line from the 'cannon' to the cursor
-			reticleLine = display.newLine( _CX, _CY + 250, x, y )
-		end
-
-		local function removeRecticle(  )
-			reticleLine:removeSelf( )
-			reticleLine = nil
-		end
-
-		local function shoot( x, y )
-			-- Disable fire until next wave
-			readyToFire = false
-
-			-- Calculate shot's trajectory
-			deltaX = _CX - x
-			deltaY = _CY + 200 - y
-
-			normDeltaX = deltaX / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
-			normDeltaY = deltaY / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
-			local speed = -500	-- Ball speed strictly aesthetic
-
-			ballFired = ammoCount	-- Keep track of ballsFired, because ammoCount can change mid-wave
-
-			-- Loop through firiing each ball
-			timer.performWithDelay( 200, function (  )
-				local tempBall = Ball:new()
-				tempBall:spawn( normDeltaX * speed, normDeltaY * speed )
-			end, ammoCount )
-		end
-
-		Runtime:addEventListener( 'touch', function ( event )
-
-			if ( readyToFire ) then
-
-				drawReticle( event.x, event.y )
-
-				if event.phase == 'ended' then
-
-					-- Calc distance of reticleLine
-					local distance = math.sqrt( 
-						math.pow( _CX - event.x, 2 ) + 
-						math.pow( _CY + 250 - event.y, 2 ) )
-
-					-- Allows cancelling shots
-					if ( distance > 150 ) then
-						shoot( event.x , event.y )
-					end
-
-					-- Clean reticle
-					removeRecticle()
-
-				end
-			end
-
-		end )
+function scene:setShotsFired( shots )
+	ballFired = shots
 end
 
 function scene:applyPickup( pickupType )
@@ -160,11 +97,10 @@ function scene:applyPickup( pickupType )
 	-- Allows for implementation of alt pickups later
 	-- Apply game logic on pickup's desc.
 	if pickupType == 'Ball' then
-		ammoCount = ammoCount + 1
-		print( '\tNew ammoCount: ' .. ammoCount )
+		Cannon:addAmmo( 1 )
 
 	elseif pickupType == 'Shockwave' then
-		blockFactory:hitAll(1)
+		BlockFactory:hitAll(1)
 		print('\tAll blocks hit for: 1')
 	end
 end
@@ -180,7 +116,7 @@ function scene:show( event )
 		-- Code here runs when the scene is still off screen (but is about to come on screen)
  
 	elseif ( phase == "did" ) then
-		-- Code here runs when the scene is entirely on screen
+		Cannon:setListening( true ) -- Enable cannon
  
 	end
 end
@@ -192,7 +128,7 @@ function scene:hide( event )
 	local phase = event.phase
  
 	if ( phase == "will" ) then
-		-- Code here runs when the scene is on screen (but is about to go off screen)
+		Cannon:setListening( false ) -- Disable cannon
  
 	elseif ( phase == "did" ) then
 		-- Code here runs immediately after the scene goes entirely off screen
