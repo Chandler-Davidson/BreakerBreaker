@@ -53,7 +53,7 @@ function scene:create( event )
 		physics.addBody( leftWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( rightWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( topWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
-		physics.addBody( bottomWall, 'static', { isSensor = false, filter = { categoryBits = 2, maskBits = 1 } } )
+		physics.addBody( bottomWall, 'static', { isSensor = false, filter = { categoryBits = 2, maskBits = 3 } } )
 		bottomWall.tag = 'ballBounds'
 
 		-- Collects all returning balls
@@ -71,6 +71,11 @@ function scene:create( event )
 					-- Create new blocks
 					startNewWave()
 				end
+
+			elseif (event.other.tag == 'block') then
+				-- Error here, not colliding with block
+				print( '**GAME OVER**' )
+				-- scene:gameOver()
 			end
 		end
 
@@ -89,9 +94,11 @@ function scene:create( event )
 		Cannon:setReadyToFire( true ) -- Enable fire
 end
 
+
 function scene:setShotsFired( shots )
 	ballFired = shots
 end
+
 
 function scene:applyPickup( pickupType )
 	print( '  Applied ' .. pickupType .. ' pickup' )
@@ -107,8 +114,7 @@ function scene:applyPickup( pickupType )
 	end
 end
  
- 
--- show()
+
 function scene:show( event )
  
 	local sceneGroup = self.view

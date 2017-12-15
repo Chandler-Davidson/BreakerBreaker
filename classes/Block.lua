@@ -36,6 +36,11 @@ function Block:spawn( xPos )
 		x = self.shape.x, y = self.shape.y - 2,
 		font = native.systemFontBold,
 		fontSize = 35 } )
+
+	if ( self.hitPoints >= 10) then
+		self.shapeHealth.size = 30
+	end
+
 	-- Define Ball's collision filter:
 		-- Cat. 2: Block
 		-- Collides with: 1 (balls) + 4 (pickups)
