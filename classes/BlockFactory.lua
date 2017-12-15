@@ -82,4 +82,10 @@ function BlockFactory:hitAll( hitPoints )
 	end
 end
 
+function BlockFactory:setAlpha( a )
+	for i = 1, #self.blocks do
+		self.blocks[i]:setAlpha( a )
+	end
+end
+
 return BlockFactory

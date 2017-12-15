@@ -14,6 +14,8 @@ local roundCount = 1 -- Track each wave's progression
 local ballFired = 0;		-- ammoCount at time of release (ammoCount changes w/ pickups)
 local ballsReturned = 0		-- count of balls returned during shot
 
+local pickups = {}
+
 local function startNewWave(  )
 	print( 'Starting Round: ' .. roundCount )
 	timer.performWithDelay( 10, function (  )
@@ -117,7 +119,9 @@ function scene:show( event )
  
 	elseif ( phase == "did" ) then
 		Cannon:setListening( true ) -- Enable cannon
- 
+		Runtime:addEventListener( "accelerometer", function (  )
+			composer.gotoScene( 'scenes.pause', { time = 300, effect = 'fade', params = { sceneFrom = self } } )
+		end )
 	end
 end
 

@@ -67,6 +67,10 @@ function Pickup:displayNotification(  )
 	end } )
 end
 
+function Pickup:setAlpha( a )
+	self.shape.alpha = a
+end
+
 function Pickup:remove( )
 	self.shape:removeSelf( )
 	self.shape = nil

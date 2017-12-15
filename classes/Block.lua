@@ -69,6 +69,11 @@ function Block:move(  )
 		})
 end
 
+function Block:setAlpha( a )
+	self.shape.alpha = a
+	self.shapeHealth.alpha = a
+end
+
 function Block:remove( )
 	self.shape:removeSelf( )
 	self.shape = nil

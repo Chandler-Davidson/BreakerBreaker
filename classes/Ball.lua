@@ -38,6 +38,10 @@ function Ball:spawn( dx, dy, power )
 	self.shape:setLinearVelocity( dx, dy )
 end
 
+function Ball:setAlpha( a )
+	self.shape.alpha = a
+end
+
 function Ball:remove(  )
 	self.shape:removeSelf( )
 	self.shape = nil
