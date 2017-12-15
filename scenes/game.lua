@@ -1,31 +1,31 @@
 local Cannon = require('classes.Cannon')
+local BlockFactory = require('classes.BlockFactory'):new()
 local Block = require('classes.Block')
 local Ball = require('classes.Ball')
-local BlockFactory = require('classes.BlockFactory'):new()
 local Pickup = require('classes.Pickup')
 
 local composer = require( "composer" )
- 
 local scene = composer.newScene()
 
 local roundCount = 1 -- Track each wave's progression
 
 -- Only allow a single shot on screen at a time
-local ballFired = 0;		-- ammoCount at time of release (ammoCount changes w/ pickups)
-local ballsReturned = 0		-- count of balls returned during shot
+local ballsFired = 0;		-- ammoCount at time of release (ammoCount changes w/ pickups)
+local ballsReturned = 0		-- count of balls returned during shot, onCollision with bottomWall
 
-local pickups = {}
-
+-- Function: startNewWave
+-- Description: Called to start each round, updating blocks and incrementing the round
 local function startNewWave(  )
 	print( 'Starting Round: ' .. roundCount )
 	timer.performWithDelay( 10, function (  )
 		-- Short timer allows collision to end
 
-		local blockCount
+		local blockCount 	-- Defines how many blocks to spawn
 
 		if roundCount < 7 then
 			blockCount = roundCount
 		else
+			-- Only 7 blocks will fit on screen
 			blockCount = 7
 		end
 
@@ -37,6 +37,10 @@ local function startNewWave(  )
 	end )	
 end
 
+
+-- Function: scene:create
+-- Description: Called upon initialization of the scene.
+--	Creates the enviroment and defines the enviroment's collision listener
 function scene:create( event )
 	local sceneGroup = self.view
 
@@ -63,7 +67,7 @@ function scene:create( event )
 				ballsReturned = ballsReturned + 1
 
 				-- Ensures all are collected before play
-				if (ballsReturned >= ballFired) then
+				if (ballsReturned >= ballsFired) then
 
 					ballsReturned = 0
 					Cannon:setReadyToFire( true );
@@ -82,24 +86,30 @@ function scene:create( event )
 		bottomWall:addEventListener( 'collision', ballListener)
 
 	-- GAME OBJECTS --
-
-		BlockFactory:spawn()
-		
-		startNewWave()
-
-		Pickup:new( { pickupType = 'Shockwave', color = { 1, 0, 0 }, notification = 'BooM!'} ):spawn( self )
-
-		-- Cannon is a singleton
+		-- Init the cannon
 		Cannon:spawn( scene )
 		Cannon:setReadyToFire( true ) -- Enable fire
+
+		-- Init blockFactory
+		BlockFactory:spawn()
+		
+		-- Start the game
+		startNewWave()
+
+		-- Example of spawning a unique pickup using inheritance
+		Pickup:new( { pickupType = 'Shockwave', color = { 1, 0, 0 }, notification = 'Boom!'} ):spawn( self )
 end
 
-
+-- Function: scene:setShotsFired
+-- Description: Used as a link between Cannon and the scene,
+-- 	probably needs to be removed
 function scene:setShotsFired( shots )
-	ballFired = shots
+	ballsFired = shots
 end
 
-
+-- Function: applyPickup
+-- Description: Uses the pickup's properties to apply logic to the game
+-- 	A connection between the pickup and other objects
 function scene:applyPickup( pickupType )
 	print( '  Applied ' .. pickupType .. ' pickup' )
 
@@ -114,7 +124,8 @@ function scene:applyPickup( pickupType )
 	end
 end
  
-
+-- Function: scene:show
+-- Description: Used to enable objects upon reentry
 function scene:show( event )
  
 	local sceneGroup = self.view
@@ -131,7 +142,8 @@ function scene:show( event )
 	end
 end
 
- 
+-- Function: scene:hide
+-- Description: Used to enable objects upon exit 
 function scene:hide( event )
  
 	local sceneGroup = self.view
@@ -146,7 +158,8 @@ function scene:hide( event )
 	end
 end
  
- 
+-- Function: scene:destroy
+-- Description: Used to remove objects upon exit
 function scene:destroy( event )
  
 	local sceneGroup = self.view

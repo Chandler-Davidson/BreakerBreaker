@@ -1,8 +1,10 @@
 local physics = require('physics')
-physics.start( )
 
+-- Default properties
 local Ball = { }
 
+-- Function: Ball:new
+-- Description: Constructor
 function Ball:new ( obj )
 	obj = obj or {}
 	setmetatable( obj, self )
@@ -10,6 +12,8 @@ function Ball:new ( obj )
 	return obj
 end
 
+-- Function: onCollision
+-- Description: Collision listener
 local function onCollision( event )
 	if ( event.phase == 'began' ) then
 		if ( event.other.tag == 'ballBounds' ) then
@@ -20,6 +24,8 @@ local function onCollision( event )
 	end
 end
 
+-- Function: Ball:spawn
+-- Description: Init object
 function Ball:spawn( dx, dy, power )
 	self.shape = display.newCircle( display.contentCenterX, display.contentHeight, 10 )
 
@@ -33,15 +39,17 @@ function Ball:spawn( dx, dy, power )
 	self.shape.isFixedRotation = true
 	self.shape.gravityScale = 0
 
-	-- Needs to be calculated
-	-- self.shape:setLinearVelocity( -100, -500 )
 	self.shape:setLinearVelocity( dx, dy )
 end
 
+-- Function: Ball:setAlpha
+-- Description: Used to hide/show obj
 function Ball:setAlpha( a )
 	self.shape.alpha = a
 end
 
+-- Function: Ball:remove
+-- Description: Deconstructor
 function Ball:remove(  )
 	self.shape:removeSelf( )
 	self.shape = nil

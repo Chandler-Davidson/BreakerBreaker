@@ -1,8 +1,11 @@
 local physics = require('physics')
 physics.start( )
 
+-- Default Properties
 local Pickup = { pickupType = 'Ball', color = { 0, 0, 1 }, notification = '+1 Ball' }
 
+-- Function: Pickup:new
+-- Description: Constructor
 function Pickup:new( obj )
 	obj = obj or {}
 	setmetatable( obj, self )
@@ -10,25 +13,34 @@ function Pickup:new( obj )
 	return obj
 end
 
+-- Function: onCollision
+-- Description: Collision Listener
 local function onCollision( event )
 
+	-- Easier reference to the main obj
+	-- 	 Clarification: event.target = display obj NOT our Pickup obj
+	--   event.target.parentObject = our Pickup obj
 	local self = event.target.parentObject
 
 	if ( event.phase == 'began' ) then
 
 		if ( event.other.tag == 'ball' ) then
 
+			-- Call scene to apply logic
 			self.scene:applyPickup( self.pickupType )
 			self:displayNotification()
 			self:remove()
 
 		elseif ( event.other.tag == 'block' ) then
+			-- We don't want lingering pickups, so if they collide remove self
 			print( '\t**Pickup removed, due to collision with block**' )
 			self:remove()
 		end
 	end
 end
 
+-- Function: Pickup:spawn
+-- Description: Init obj
 function Pickup:spawn( scene )
 	self.scene = scene	-- Connectino to game scene
 
@@ -58,6 +70,8 @@ function Pickup:spawn( scene )
 	self.shape:addEventListener( 'collision', onCollision )
 end
 
+-- Function: Pickup:displayNotification
+-- Description: Fades in/out text, ex. '+1 Ball'
 function Pickup:displayNotification(  )
 	local notification = display.newText( self.notification, self.shape.x, self.shape.y, native.systemFontBold, 20 )
 	notification.alpha = 0
@@ -67,10 +81,14 @@ function Pickup:displayNotification(  )
 	end } )
 end
 
+-- Function: Pickup:setAlpha
+-- Description: Used to show/hide the obj
 function Pickup:setAlpha( a )
 	self.shape.alpha = a
 end
 
+-- Function: Pickup:remove
+-- Description: Deconstructor
 function Pickup:remove( )
 	self.shape:removeSelf( )
 	self.shape = nil

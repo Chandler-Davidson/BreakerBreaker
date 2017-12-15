@@ -6,7 +6,7 @@ local sceneLink 	-- Used to update the shotsFired
 
 -- Cannon properties
 local ammoCount = 1			-- Track ammo available
-local listening = false 		-- Is game scene visible?
+local listening = false 	-- Is game scene visible?
 local readyToFire = false 	-- Have all balls returned?
 
 local reticleLine -- Var for common displayObj
@@ -14,6 +14,8 @@ local reticleLine -- Var for common displayObj
 local _CX = display.contentCenterX
 local _CY = display.contentCenterY
 
+-- Function: drawReticle
+-- Description: Updates the reticle
 local function drawReticle( x, y )
 	-- Clean any prexisting reticle
 	if reticleLine then
@@ -24,11 +26,15 @@ local function drawReticle( x, y )
 	reticleLine = display.newLine( _CX, _CY + 250, x, y )
 end
 
+-- Function: removeReticle
+-- Description: Removes the drawn reticle
 local function removeRecticle(  )
 	reticleLine:removeSelf( )
 	reticleLine = nil
 end
 
+-- Function: shoot
+-- Description: Fires balls upon tap's location
 local function shoot( x, y )
 	-- Disable fire until next wave
 	readyToFire = false
@@ -52,7 +58,8 @@ local function shoot( x, y )
 	end, ammoCount )
 end
 
--- Initialize event listener
+-- Function: Cannon:spawn
+-- Description: Init obj
 function Cannon:spawn( scene )
 	sceneLink = scene
 
@@ -83,17 +90,21 @@ function Cannon:spawn( scene )
 	end )
 end
 
--- Apply pickup
+-- Function: Cannon:addAmmo
+-- Description: Adds ammo to inventory
 function Cannon:addAmmo( ammo )
 	ammoCount = ammoCount + ammo
 	print( '\tNew ammoCount: ' .. ammoCount )
 end
 
--- Enable/Disable cannon
+-- Function: setListening
+-- Description: enable/disable cannon
 function Cannon:setListening( state )
 	listening = state
 end
 
+-- Function: setReadyToFire
+-- Description: enable/disable cannon
 function Cannon:setReadyToFire( state )
 	readyToFire = state
 end

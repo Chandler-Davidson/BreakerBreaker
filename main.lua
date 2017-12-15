@@ -8,19 +8,35 @@ composer.gotoScene( 'scenes.game' )
 -- TODO --
 
 -- Game:
--- 	1. Move blocks after all balls are dead. Currently: Move block on shoot.
--- 	2. Difficulty needs to ramp. Currently: static
+-- 	1. Difficulty ramping is not fun, needs to be smarter
+-- 		1. Maybe have a set amount of points needed for each wave, then
+--		   split those points across a random # of blocks
 -- 	3. Combo counter???
--- 		1. Maybe balls grow stronger?
--- 	4. Check if ball is stuck
--- 		1. Occasionally check verticle movement
+-- 		1. Attach a counter to the ball?
+-- 		2. Maybe balls grow stronger?
+-- 	4. Occasionally check verticle movement, balls can take forever moving horizontally
+-- 	5. Highscore
 
 -- Pickups:
--- 	1. Pickups need to live outisde of blocks
+-- 	1. Pickups can spawn inside blocks and are removed if they are
 -- 	2. New pickup ideas
--- 	3. Random pickup spawn times
+-- 		Currently:
+--			1. Add ammo
+--			2. Hit all blocks (shockwave)
 
 -- Cannon:
--- 	1. Reticle and ball shot don't align perfectly
--- 	2. Canceling shots
--- 	3. Only draw reticle to first block
+-- 	1. Reticle not cute, visual rework
+-- 	2. Visual cue for canceling shots
+
+-- UI:
+-- 	1. Needs?
+-- 	2. Design?
+
+-- Look and Feel:
+-- 1. Needs?
+
+-- Menu:
+-- 1. Main menu
+--  	1. Credits
+-- 2. Store?
+-- 3. Facebook/Twitter?
