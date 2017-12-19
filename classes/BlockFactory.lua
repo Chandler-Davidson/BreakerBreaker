@@ -2,6 +2,11 @@ local Block = require('classes.Block')
 
 local BlockFactory = {}
 
+local inPlay = true
+local holdingMove = false
+local inQueueSpawnNumBlocks
+local inQueueSpawnDifficulty
+
 -- Function: BlockFactory:new
 -- Description: Constructor
 function BlockFactory:new( obj )
@@ -20,32 +25,38 @@ end
 -- Function: BlockFactory:spawnBlocks
 -- Description: Spawns the number of specified blocks
 function BlockFactory:spawnBlocks( numBlocks, difficulty )
-	print( '  Spawning Blocks:' )
+	if inPlay then
 
-		-- Generate random, non repeating locations
+		print( '  Spawning Blocks:' )
 
-		local randNumbers = {}	-- Holds chosen locations 
-		local tempNum
+			-- Generate random, non repeating locations
+			local randNumbers = {}	-- Holds chosen locations 
+			local tempNum
 
-		-- Decide a random location for each block
-		for i = 1, numBlocks do
+			-- Decide a random location for each block
+			for i = 1, numBlocks do
 
-			repeat
-				tempNum = math.random( 1, 7 ) * 40
+				repeat
+					tempNum = math.random( 1, 7 ) * 40
 
-				if ( table.indexOf( randNumbers, tempNum ) == nil ) then
+					if ( table.indexOf( randNumbers, tempNum ) == nil ) then
 
-					-- Put new number into table
-					randNumbers[i] = tempNum
+						-- Put new number into table
+						randNumbers[i] = tempNum
 
-					-- Spawn a new block, then insert into table
-					local tempBlock = Block:new( { hitPoints = difficulty + math.random( 1, 5 ) } )
-					tempBlock:spawn( randNumbers[i] )
-					table.insert( self.blocks, tempBlock )
+						-- Spawn a new block, then insert into table
+						local tempBlock = Block:new( { hitPoints = difficulty + math.random( 1, 5 ) } )
+						tempBlock:spawn( randNumbers[i] )
+						table.insert( self.blocks, tempBlock )
 
-				end
+					end
 
-			until randNumbers[i] ~= nil
+				until randNumbers[i] ~= nil
+			end
+		else
+			inQueueSpawnNumBlocks = numBlocks
+			inQueueSpawnDifficulty = difficulty
+			holdingMove = true
 		end
 end
 
@@ -66,18 +77,23 @@ end
 -- Function: BlockFactory:moveBlocks
 -- Description: Moves all active blocks down
 function BlockFactory:moveBlocks( )
-	-- Iterate through table
-	for i = 1, #self.blocks do
-		if self.blocks[i] and self.blocks[i].shape then
-			self.blocks[i]:move()
-		else
-			-- Garbage collection
-			self.blocks[i] = nil
-		end
-	end
 
-	-- Clean up the table
-	self:refactor()
+	if inPlay then
+		-- Iterate through table
+		for i = 1, #self.blocks do
+			if self.blocks[i] and self.blocks[i].shape then
+				self.blocks[i]:move()
+			else
+				-- Garbage collection
+				self.blocks[i] = nil
+			end
+		end
+
+		-- Clean up the table
+		self:refactor()
+	else
+		holdingMove = true
+	end
 end
 
 -- Function: BlockFactory:hitAll
@@ -98,6 +114,19 @@ function BlockFactory:setAlpha( a )
 	for i = 1, #self.blocks do
 		self.blocks[i]:setAlpha( a )
 	end
+end
+
+function BlockFactory:setInPlay( a )
+	inPlay = a
+
+	if inPlay and holdingMove then
+		self:spawnBlocks( inQueueSpawnNumBlocks, inQueueSpawnDifficulty )
+		self:moveBlocks()
+	end
+end
+
+function BlockFactory:setHoldingMove( a )
+	holdingMove = a
 end
 
 return BlockFactory

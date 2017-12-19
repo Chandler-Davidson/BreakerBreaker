@@ -1,10 +1,13 @@
+local composer = require( "composer" )
+
 local Cannon = require('classes.Cannon')
 local BlockFactory = require('classes.BlockFactory'):new()
 local Block = require('classes.Block')
 local Ball = require('classes.Ball')
 local Pickup = require('classes.Pickup')
 
-local composer = require( "composer" )
+local HUD = require('scenes.HUD')
+
 local scene = composer.newScene()
 
 local roundCount = 1 -- Track each wave's progression
@@ -17,6 +20,9 @@ local ballsReturned = 0		-- count of balls returned during shot, onCollision wit
 -- Description: Called to start each round, updating blocks and incrementing the round
 local function startNewWave(  )
 	print( 'Starting Round: ' .. roundCount )
+
+	HUD:newRound()
+
 	timer.performWithDelay( 10, function (  )
 		-- Short timer allows collision to end
 
@@ -43,6 +49,8 @@ end
 --	Creates the enviroment and defines the enviroment's collision listener
 function scene:create( event )
 	local sceneGroup = self.view
+
+	composer.showOverlay( 'scenes.HUD' )
 
 	-- Commonly used coordinates
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
@@ -100,6 +108,10 @@ function scene:create( event )
 		Pickup:new( { pickupType = 'Shockwave', color = { 1, 0, 0 }, notification = 'Boom!'} ):spawn( self )
 end
 
+function scene:gameOver(  )
+	composer.gotoScene( 'scenes.gameOver', {time = 200, effect = 'slideRight', params = {score = roundCount}} )
+end
+
 -- Function: scene:setShotsFired
 -- Description: Used as a link between Cannon and the scene,
 -- 	probably needs to be removed
@@ -132,12 +144,14 @@ function scene:show( event )
 	local phase = event.phase
  
 	if ( phase == "will" ) then
-		-- Code here runs when the scene is still off screen (but is about to come on screen)
+
+		Cannon:setListening( true ) -- Enable cannon
+		BlockFactory:setAlpha(1)
+		BlockFactory:setInPlay(true)
  
 	elseif ( phase == "did" ) then
-		Cannon:setListening( true ) -- Enable cannon
 		Runtime:addEventListener( "accelerometer", function (  )
-			composer.gotoScene( 'scenes.pause', { time = 300, effect = 'fade', params = { sceneFrom = self } } )
+			composer.gotoScene( 'scenes.options', { time = 300, effect = 'fade', params = { sceneFrom = 'scenes.game' } } )
 		end )
 	end
 end
@@ -151,7 +165,11 @@ function scene:hide( event )
  
 	if ( phase == "will" ) then
 		Cannon:setListening( false ) -- Disable cannon
- 
+ 		BlockFactory:setAlpha(0)
+ 		BlockFactory:setInPlay( false )
+
+ 		-- Hide pickups
+
 	elseif ( phase == "did" ) then
 		-- Code here runs immediately after the scene goes entirely off screen
  

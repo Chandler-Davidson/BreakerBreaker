@@ -18,11 +18,8 @@ end
 -- Description: Collision Listener
 local function onCollision( event )
 	if ( event.phase == 'began' ) then
-
 		if ( event.other.tag == 'ball' ) then
-
 			event.target.parentObject:hit()
-
 		end
 	end
 end

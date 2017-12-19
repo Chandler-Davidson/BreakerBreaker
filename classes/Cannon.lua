@@ -5,6 +5,7 @@ local Cannon = { }
 local sceneLink 	-- Used to update the shotsFired
 
 -- Cannon properties
+local fireSpeed = require('composer').getVariable( 'ballSpeed' ) * -100
 local ammoCount = 1			-- Track ammo available
 local listening = false 	-- Is game scene visible?
 local readyToFire = false 	-- Have all balls returned?
@@ -45,7 +46,6 @@ local function shoot( x, y )
 
 	normDeltaX = deltaX / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
 	normDeltaY = deltaY / math.sqrt(math.pow(deltaX,2) + math.pow(deltaY,2))
-	local speed = -500	-- Ball speed strictly aesthetic
 
 	if ( sceneLink ) then
 		sceneLink:setShotsFired( ammoCount )
@@ -54,7 +54,7 @@ local function shoot( x, y )
 	-- Loop through firiing each ball
 	timer.performWithDelay( 200, function (  )
 		local tempBall = Ball:new()
-		tempBall:spawn( normDeltaX * speed, normDeltaY * speed )
+		tempBall:spawn( normDeltaX * fireSpeed, normDeltaY * fireSpeed )
 	end, ammoCount )
 end
 
@@ -98,7 +98,7 @@ function Cannon:addAmmo( ammo )
 end
 
 -- Function: setListening
--- Description: enable/disable cannon
+-- Description: enable/disable cannon based upon game scene's current state
 function Cannon:setListening( state )
 	listening = state
 end

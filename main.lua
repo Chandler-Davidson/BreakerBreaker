@@ -2,6 +2,12 @@ display.setStatusBar(display.HiddenStatusBar)
 
 local composer = require('composer')
 
+-- Define initial game settings as globals --
+composer.setVariable( 'playerName', 'PLAYER' )
+composer.setVariable( 'ballSpeed', 5 )
+audio.setVolume( 1 )
+composer.setVariable( 'highScore', 5 )
+
 composer.gotoScene( 'scenes.game' )
 
 

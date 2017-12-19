@@ -178,7 +178,7 @@ function scene:create( event )
 			sceneGroup:insert( self.slider )
 
 			-- Labels --
-	  		local sensitivityLabel = display.newText( { 
+	  		local ballSpeedLabel = display.newText( { 
 				parent = sceneGroup, 
 				text = "Sensitivity", 
 				font = "kenvector_future_thin.ttf", 
@@ -206,7 +206,7 @@ function scene:create( event )
 				align = 'center' } )
 
     		-- Assign Label Colors --
-		  	sensitivityLabel:setFillColor(.5, .5, .5)
+		  	ballSpeedLabel:setFillColor(.5, .5, .5)
 		  	sliderLabelLow:setFillColor(.5, .5, .5)
 	  		sliderLabelHigh:setFillColor(.5, .5, .5)
 
@@ -220,23 +220,15 @@ function scene:create( event )
 			width = 150, height = 40,
 			x = 195, y = _H -90,
 			onRelease = function ( )
-				print('Changes accepted')
-
 				audio.play( clickSound )
 
 				-- Set all of the game settings
 				composer.setVariable( 'playerName', string.upper( self.nameField.text ) )
 				audio.setVolume( self.audioSwitch.isOn and 1 or 0 )
-				composer.setVariable( 'playerSensitivity', math.floor (self.slider.value / 10))
+				composer.setVariable( 'ballSpeed', math.floor (self.slider.value / 10))
 
 				-- Return to the appropriate scene
-				if event.params.sceneFrom then
-					-- In pause menu
-					composer.gotoScene( 'scenes.game', { time = 200, effect = 'slideRight' } )
-				else
-					-- In main menu
-					composer.gotoScene( 'scenes.menu', { time = 200, effect = 'slideRight' } )
-				end
+				composer.gotoScene( event.params.sceneFrom, { time = 200, effect = 'slideRight' } )
 
 			end } )
 			sceneGroup:insert( acceptButton )
@@ -247,15 +239,10 @@ function scene:create( event )
 			width = 40, height = 40,
 			x = 70, y = _H -90,
 			onRelease = function ( )
-				print('Changes removed')
-
 				audio.play( clickSound )
 				
-				if event.params.sceneFrom then
-					composer.gotoScene( 'scenes.game', { time = 200, effect = 'slideRight' } )
-				else
-					composer.gotoScene( 'scenes.menu', { time = 200, effect = 'slideRight' } )
-				end		
+				-- Return to the appropriate scene
+				composer.gotoScene( event.params.sceneFrom, { time = 200, effect = 'slideRight' } )
 			end } )
 			sceneGroup:insert( self.backButton )
 end
@@ -270,7 +257,7 @@ function scene:show( event )
 	elseif ( phase == "did" ) then
 
 		-- Fill in fields from memory
-		self.slider.value = composer.getVariable( 'playerSensitivity' ) * 10
+		self.slider.value = composer.getVariable( 'ballSpeed' ) * 10
 		self.nameField.text = composer.getVariable( 'playerName' )
 		self.audioSwitch.value = audio.getVolume( ) == 0 and false or true
 	
