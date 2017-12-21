@@ -50,8 +50,6 @@ end
 function scene:create( event )
 	local sceneGroup = self.view
 
-	composer.showOverlay( 'scenes.HUD' )
-
 	-- Commonly used coordinates
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
 
@@ -87,7 +85,7 @@ function scene:create( event )
 			elseif (event.other.tag == 'block') then
 				-- Error here, not colliding with block
 				print( '**GAME OVER**' )
-				-- scene:gameOver()
+				scene:gameOver()
 			end
 		end
 
@@ -100,16 +98,17 @@ function scene:create( event )
 
 		-- Init blockFactory
 		BlockFactory:spawn()
-		
-		-- Start the game
-		startNewWave()
 
 		-- Example of spawning a unique pickup using inheritance
 		Pickup:new( { pickupType = 'Shockwave', color = { 1, 0, 0 }, notification = 'Boom!'} ):spawn( self )
 end
 
 function scene:gameOver(  )
-	composer.gotoScene( 'scenes.gameOver', {time = 200, effect = 'slideRight', params = {score = roundCount}} )
+	if (roundCount > composer.getVariable('highScore')) then
+		composer.setVariable( 'highScore', roundCount )
+	end
+
+	composer.gotoScene( 'scenes.leaderboard', {time = 200, effect = 'slideRight', params = {score = roundCount}} )
 end
 
 -- Function: scene:setShotsFired
@@ -144,6 +143,7 @@ function scene:show( event )
 	local phase = event.phase
  
 	if ( phase == "will" ) then
+		composer.showOverlay( 'scenes.HUD' )
 
 		Cannon:setListening( true ) -- Enable cannon
 		BlockFactory:setAlpha(1)

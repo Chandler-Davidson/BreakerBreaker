@@ -180,7 +180,7 @@ function scene:create( event )
 			-- Labels --
 	  		local ballSpeedLabel = display.newText( { 
 				parent = sceneGroup, 
-				text = "Sensitivity", 
+				text = "Ball Speed", 
 				font = "kenvector_future_thin.ttf", 
 				fontSize = 15,
 				x = _CX - 65,
