@@ -1,30 +1,33 @@
 local Block = require('classes.Block')
+local Pickup = require('classes.Pickup')
 
-local BlockFactory = {}
+local Observer = {}
 
 local inPlay = true
 local holdingMove = false
 local inQueueSpawnNumBlocks
 local inQueueSpawnDifficulty
 
--- Function: BlockFactory:new
+-- Function: Observer:new
 -- Description: Constructor
-function BlockFactory:new( obj )
+function Observer:new( obj )
 	obj = obj or {}
 	setmetatable( obj, self )
 	self.__index = self
 	return obj
 end
 
--- Function: BlockFactory:spawn
+-- Function: Observer:spawn
 -- Description: Init obj
-function BlockFactory:spawn(  )
+function Observer:spawn( scene )
+	self.scene = scene
 	self.blocks = {} -- Hold alive blocks
+	self.pickups = {} -- Hold pickups
 end
 
--- Function: BlockFactory:spawnBlocks
+-- Function: Observer:spawnBlocks
 -- Description: Spawns the number of specified blocks
-function BlockFactory:spawnBlocks( numBlocks, difficulty )
+function Observer:spawnBlocks( numBlocks, difficulty )
 	if inPlay then
 
 		print( '  Spawning Blocks:' )
@@ -60,23 +63,37 @@ function BlockFactory:spawnBlocks( numBlocks, difficulty )
 		end
 end
 
--- Function: BlockFactory:refactor
+-- Function: Observer:spawnPickup
+-- Description: Spawns an instance of the specficic pickup
+function Observer:spawnPickup( type )
+	local strNote
+
+	if ( type == "Ball" ) then
+		strNote = "+1 Ball"
+	else
+		strNote = "Boom!"
+	end
+
+	Pickup:new( { pickupType = type, color = { 1, 0, 0 }, notification = strNote } ):spawn( self.scene )
+end
+
+-- Function: Observer:refactor
 -- Description: Resets the blocks{} removing any nil indexes
-function BlockFactory:refactor(  )
+function Observer:refactor( list )
 	local newT = {}
 
-	for i=1,#self.blocks do
-		if self.blocks[i] ~= nil then
-			table.insert( newT, self.blocks[i] )
+	for i=1,#list do
+		if list[i] ~= nil then
+			table.insert( newT, list[i] )
 		end
 	end
 
-	self.blocks = newT
+	list = newT
 end
 
--- Function: BlockFactory:moveBlocks
+-- Function: Observer:moveBlocks
 -- Description: Moves all active blocks down
-function BlockFactory:moveBlocks( )
+function Observer:moveBlocks( )
 
 	if inPlay then
 		-- Iterate through table
@@ -89,34 +106,37 @@ function BlockFactory:moveBlocks( )
 			end
 		end
 
-		-- Clean up the table
-		self:refactor()
+		-- Clean up blocks
+		self:refactor( self.blocks )
+
 	else
 		holdingMove = true
 	end
 end
 
--- Function: BlockFactory:hitAll
+-- Function: Observer:hitAll
 -- Description: Hits all active blocks
-function BlockFactory:hitAll( hitPoints )
-	for j = 1, hitPoints do
-		for i = 1, #self.blocks do
-			if self.blocks[i] then
-				self.blocks[i]:hit()
-			end
+function Observer:hitAll( hitPoints )
+	for i = 1, #self.blocks do
+		if self.blocks[i] then
+			self.blocks[i]:hit( hitPoints )
 		end
 	end
 end
 
--- Function: BlockFactory:setAlpha
+-- Function: Observer:setAlpha
 -- Description: Hides/Shows all blocks
-function BlockFactory:setAlpha( a )
+function Observer:setAlpha( a )
 	for i = 1, #self.blocks do
 		self.blocks[i]:setAlpha( a )
 	end
+
+	for i = 1, #self.pickups do
+		self.pickups[i]:setAlpha( a )
+	end
 end
 
-function BlockFactory:setInPlay( a )
+function Observer:setInPlay( a )
 	inPlay = a
 
 	if inPlay and holdingMove then
@@ -125,8 +145,8 @@ function BlockFactory:setInPlay( a )
 	end
 end
 
-function BlockFactory:setHoldingMove( a )
+function Observer:setHoldingMove( a )
 	holdingMove = a
 end
 
-return BlockFactory
+return Observer

@@ -58,8 +58,10 @@ end
 
 -- Function: Block:hit
 -- Description: If hit by a ball, lower HP
-function Block:hit(  )
-	self.hitPoints = self.hitPoints - 1
+function Block:hit( hp )
+	hp = hp or 1
+
+	self.hitPoints = self.hitPoints - hp
 
 	if self.hitPoints <= 0 then
 		-- Delete block

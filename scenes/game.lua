@@ -1,7 +1,7 @@
 local composer = require( "composer" )
 
 local Cannon = require('classes.Cannon')
-local BlockFactory = require('classes.BlockFactory'):new()
+local Observer = require('classes.Observer'):new()
 local Block = require('classes.Block')
 local Ball = require('classes.Ball')
 local Pickup = require('classes.Pickup')
@@ -35,9 +35,9 @@ local function startNewWave(  )
 			blockCount = 7
 		end
 
-		BlockFactory:spawnBlocks(blockCount, roundCount)
-		BlockFactory:moveBlocks()
-		Pickup:new():spawn( scene )
+		Observer:spawnBlocks(blockCount, roundCount)
+		Observer:moveBlocks()
+		Observer:spawnPickup( "Ball" )
 
 		roundCount = roundCount + 1
 	end )	
@@ -97,10 +97,11 @@ function scene:create( event )
 		Cannon:setReadyToFire( true ) -- Enable fire
 
 		-- Init blockFactory
-		BlockFactory:spawn()
+		Observer:spawn( scene )
 
-		-- Example of spawning a unique pickup using inheritance
-		Pickup:new( { pickupType = 'Shockwave', color = { 1, 0, 0 }, notification = 'Boom!'} ):spawn( self )
+		timer.performWithDelay( 10, function (  )
+			startNewWave()
+		end  )
 end
 
 function scene:gameOver(  )
@@ -120,7 +121,6 @@ end
 
 -- Function: applyPickup
 -- Description: Uses the pickup's properties to apply logic to the game
--- 	A connection between the pickup and other objects
 function scene:applyPickup( pickupType )
 	print( '  Applied ' .. pickupType .. ' pickup' )
 
@@ -130,9 +130,12 @@ function scene:applyPickup( pickupType )
 		Cannon:addAmmo( 1 )
 
 	elseif pickupType == 'Shockwave' then
-		BlockFactory:hitAll(1)
+		Observer:hitAll(1)
 		print('\tAll blocks hit for: 1')
 	end
+
+	-- Clean up pickups
+	Observer:refactor( Observer.pickups )
 end
  
 -- Function: scene:show
@@ -146,8 +149,8 @@ function scene:show( event )
 		composer.showOverlay( 'scenes.HUD' )
 
 		Cannon:setListening( true ) -- Enable cannon
-		BlockFactory:setAlpha(1)
-		BlockFactory:setInPlay(true)
+		Observer:setAlpha(1)
+		Observer:setInPlay(true)
  
 	elseif ( phase == "did" ) then
 		Runtime:addEventListener( "accelerometer", function (  )
@@ -165,10 +168,8 @@ function scene:hide( event )
  
 	if ( phase == "will" ) then
 		Cannon:setListening( false ) -- Disable cannon
- 		BlockFactory:setAlpha(0)
- 		BlockFactory:setInPlay( false )
-
- 		-- Hide pickups
+ 		Observer:setAlpha(0) 	-- Hide pickups and blocks
+ 		Observer:setInPlay( false )
 
 	elseif ( phase == "did" ) then
 		-- Code here runs immediately after the scene goes entirely off screen
