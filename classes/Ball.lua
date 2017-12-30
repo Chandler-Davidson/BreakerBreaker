@@ -42,10 +42,21 @@ function Ball:spawn( dx, dy, power )
 	self.shape:setLinearVelocity( dx, dy )
 end
 
--- Function: Ball:setAlpha
--- Description: Used to hide/show obj
-function Ball:setAlpha( a )
-	self.shape.alpha = a
+-- Function: Ball:setActive
+-- Description: Used to play/pause obj
+function Ball:setActive( active )
+	if active then 	-- Set to play
+		-- Reset the velocity
+		self.shape:setLinearVelocity( self.dx, self.dy )
+		self.shape.alpha = 1
+	else 	-- Set to pause
+		-- Store the velocity and stop
+		local x, y = self.shape:getLinearVelocity( )
+		self.dx = x
+		self.dy = y
+		self.shape:setLinearVelocity( 0, 0 )	
+		self.shape.alpha = 0
+	end
 end
 
 -- Function: Ball:remove

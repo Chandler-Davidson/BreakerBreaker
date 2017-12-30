@@ -2,11 +2,7 @@ local composer = require( "composer" )
 
 local Cannon = require('classes.Cannon')
 local Observer = require('classes.Observer'):new()
-local Block = require('classes.Block')
-local Ball = require('classes.Ball')
-local Pickup = require('classes.Pickup')
-
-local HUD = require('scenes.HUD')
+local HUD = require('classes.HUD')
 
 local scene = composer.newScene()
 
@@ -21,7 +17,9 @@ local ballsReturned = 0		-- count of balls returned during shot, onCollision wit
 local function startNewWave(  )
 	print( 'Starting Round: ' .. roundCount )
 
-	HUD:newRound()
+	HUD:newRound( )
+
+	Cannon:refactor()
 
 	timer.performWithDelay( 10, function (  )
 		-- Short timer allows collision to end
@@ -101,7 +99,7 @@ function scene:create( event )
 		-- Init blockFactory
 		Observer:spawn( scene )
 
-		composer.showOverlay( 'scenes.HUD', { params = { currentRound = 1 }})
+		HUD:spawn()
 
 		startNewWave()
 end
@@ -148,8 +146,7 @@ function scene:show( event )
 	local phase = event.phase
  
 	if ( phase == "will" ) then
-		composer.showOverlay( 'scenes.HUD', { params = { currentRound = roundCount }})
-
+		HUD:setActive(1)
 		Cannon:setListening( true ) -- Enable cannon
 		Observer:setAlpha(1)
 		Observer:setInPlay(true)
@@ -169,6 +166,7 @@ function scene:hide( event )
 	local phase = event.phase
  
 	if ( phase == "will" ) then
+		HUD:setActive(0)
 		Cannon:setListening( false ) -- Disable cannon
  		Observer:setAlpha(0) 	-- Hide pickups and blocks
  		Observer:setInPlay( false )
@@ -184,7 +182,7 @@ end
 function scene:destroy( event )
  
 	local sceneGroup = self.view
-	-- Code here runs prior to the removal of scene's view
+	HUD:remove()
  
 end
 

@@ -5,6 +5,8 @@ local Cannon = { }
 local sceneLink 	-- Used to update the shotsFired
 
 -- Cannon properties
+local balls = {}
+local velocityHolder = {}
 local fireSpeed = require('composer').getVariable( 'ballSpeed' ) * -100
 local ammoCount = 1			-- Track ammo available
 local listening = false 	-- Is game scene visible?
@@ -36,7 +38,7 @@ end
 
 -- Function: shoot
 -- Description: Fires balls upon tap's location
-local function shoot( x, y )
+function Cannon:shoot( x, y )
 	-- Disable fire until next wave
 	readyToFire = false
 
@@ -55,7 +57,23 @@ local function shoot( x, y )
 	timer.performWithDelay( 200, function (  )
 		local tempBall = Ball:new()
 		tempBall:spawn( normDeltaX * fireSpeed, normDeltaY * fireSpeed )
+
+		table.insert( balls, tempBall )
 	end, ammoCount )
+end
+
+function Cannon:refactor( )
+	local newT = {}
+
+	if balls then
+		for i=1,#balls do
+			if balls[i] and balls[i].shape then
+				table.insert( newT, balls[i] )
+			end
+		end
+
+		balls = newT
+	end
 end
 
 -- Function: Cannon:spawn
@@ -78,7 +96,7 @@ function Cannon:spawn( scene )
 
 				-- Allows cancelling shots
 				if ( distance > 150 ) then
-					shoot( event.x , event.y )
+					self:shoot( event.x , event.y )
 				end
 
 				-- Clean reticle
@@ -101,6 +119,12 @@ end
 -- Description: enable/disable cannon based upon game scene's current state
 function Cannon:setListening( state )
 	listening = state
+	
+	self:refactor()
+
+	for i = 1, #balls do
+		balls[i]:setActive( state )
+	end
 end
 
 -- Function: setReadyToFire

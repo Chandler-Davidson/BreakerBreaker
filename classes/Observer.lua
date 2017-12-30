@@ -7,6 +7,7 @@ local inPlay = true
 local holdingMove = false
 local inQueueSpawnNumBlocks
 local inQueueSpawnDifficulty
+local inQueuePickup
 
 -- Function: Observer:new
 -- Description: Constructor
@@ -56,11 +57,11 @@ function Observer:spawnBlocks( numBlocks, difficulty )
 
 				until randNumbers[i] ~= nil
 			end
-		else
-			inQueueSpawnNumBlocks = numBlocks
-			inQueueSpawnDifficulty = difficulty
-			holdingMove = true
-		end
+	else
+		inQueueSpawnNumBlocks = numBlocks
+		inQueueSpawnDifficulty = difficulty
+		holdingMove = true
+	end
 end
 
 -- Function: Observer:spawnPickup
@@ -75,9 +76,14 @@ function Observer:spawnPickup( type )
 	end
 
 	local temp = Pickup:new( { pickupType = type, color = { 1, 0, 0 }, notification = strNote } )
-	temp:spawn( self.scene )
 
-	table.insert( self.pickups, temp )
+	if inPlay then
+		temp:spawn( self.scene )
+		table.insert( self.pickups, temp )
+	else
+		inQueuePickup = temp
+		holdingMove = true
+	end
 end
 
 -- Function: Observer:refactor
@@ -151,6 +157,10 @@ function Observer:setInPlay( a )
 	if inPlay and holdingMove then
 		self:spawnBlocks( inQueueSpawnNumBlocks, inQueueSpawnDifficulty )
 		self:moveBlocks()
+
+		inQueuePickup:spawn( self.scene )
+		table.insert(self.pickups, inQueuePickup)
+		inQueuePickup = nil
 	end
 end
 
