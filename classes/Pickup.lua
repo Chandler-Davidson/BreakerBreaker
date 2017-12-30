@@ -84,7 +84,9 @@ end
 -- Function: Pickup:setAlpha
 -- Description: Used to show/hide the obj
 function Pickup:setAlpha( a )
-	self.shape.alpha = a
+	if self.shape then
+		self.shape.alpha = a
+	end
 end
 
 -- Function: Pickup:remove

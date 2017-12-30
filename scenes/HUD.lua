@@ -6,8 +6,10 @@ local scene = composer.newScene()
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
+
 local highScore = composer.getVariable( 'highScore' )
 local roundCount
+print( '1' )
 local bestCounter
  
 -- -----------------------------------------------------------------------------------
@@ -19,6 +21,8 @@ function scene:create( event )
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
  
 	local sceneGroup = self.view
+
+	print( '2' )
 
 	roundCount = display.newText( {
 		parent = sceneGroup,
@@ -38,22 +42,25 @@ function scene:create( event )
 end
 
 function scene:newRound(  )
-	roundCount.text = roundCount.text + 1
 
-	if tonumber(roundCount.text) > highScore then
-		bestCounter.text = "Best: " .. roundCount.text
+	if roundCount.text then
+		roundCount.text = roundCount.text + 1
+
+		if tonumber(roundCount.text) > highScore then
+			bestCounter.text = "Best: " .. roundCount.text
+		end
 	end
 end
  
  
 -- show()
 function scene:show( event )
- 
+	print( '4' )
 	local sceneGroup = self.view
 	local phase = event.phase
  
 	if ( phase == "will" ) then
-		-- Code here runs when the scene is still off screen (but is about to come on screen)
+		roundCount.text = event.params.currentRound
  
 	elseif ( phase == "did" ) then
 		-- Code here runs when the scene is entirely on screen

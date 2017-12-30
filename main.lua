@@ -4,7 +4,7 @@ local composer = require('composer')
 
 -- Define initial game settings as globals --
 composer.setVariable( 'playerName', 'PLAYER' )
-composer.setVariable( 'ballSpeed', 5 )
+composer.setVariable( 'ballSpeed', 20 )
 audio.setVolume( 1 )
 composer.setVariable( 'highScore', 5 )
 

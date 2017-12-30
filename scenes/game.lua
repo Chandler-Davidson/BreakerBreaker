@@ -63,7 +63,9 @@ function scene:create( event )
 		physics.addBody( leftWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( rightWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( topWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
-		physics.addBody( bottomWall, 'static', { isSensor = false, filter = { categoryBits = 2, maskBits = 3 } } )
+		physics.addBody( bottomWall, 'dynamic', { isSensor = true, filter = { categoryBits = 8, maskBits = 3 } } )
+		bottomWall.gravityScale = 0
+
 		bottomWall.tag = 'ballBounds'
 
 		-- Collects all returning balls
@@ -99,9 +101,9 @@ function scene:create( event )
 		-- Init blockFactory
 		Observer:spawn( scene )
 
-		timer.performWithDelay( 10, function (  )
-			startNewWave()
-		end  )
+		composer.showOverlay( 'scenes.HUD', { params = { currentRound = 1 }})
+
+		startNewWave()
 end
 
 function scene:gameOver(  )
@@ -146,7 +148,7 @@ function scene:show( event )
 	local phase = event.phase
  
 	if ( phase == "will" ) then
-		composer.showOverlay( 'scenes.HUD' )
+		composer.showOverlay( 'scenes.HUD', { params = { currentRound = roundCount }})
 
 		Cannon:setListening( true ) -- Enable cannon
 		Observer:setAlpha(1)

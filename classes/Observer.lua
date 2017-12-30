@@ -74,7 +74,10 @@ function Observer:spawnPickup( type )
 		strNote = "Boom!"
 	end
 
-	Pickup:new( { pickupType = type, color = { 1, 0, 0 }, notification = strNote } ):spawn( self.scene )
+	local temp = Pickup:new( { pickupType = type, color = { 1, 0, 0 }, notification = strNote } )
+	temp:spawn( self.scene )
+
+	table.insert( self.pickups, temp )
 end
 
 -- Function: Observer:refactor
@@ -83,7 +86,7 @@ function Observer:refactor( list )
 	local newT = {}
 
 	for i=1,#list do
-		if list[i] ~= nil then
+		if list[i] and list[i].shape then
 			table.insert( newT, list[i] )
 		end
 	end
@@ -109,6 +112,9 @@ function Observer:moveBlocks( )
 		-- Clean up blocks
 		self:refactor( self.blocks )
 
+		-- Clean up pickups, because...
+		self:refactor( self.pickups )
+
 	else
 		holdingMove = true
 	end
@@ -127,6 +133,9 @@ end
 -- Function: Observer:setAlpha
 -- Description: Hides/Shows all blocks
 function Observer:setAlpha( a )
+	self:refactor(self.blocks)
+	self:refactor(self.pickups)
+
 	for i = 1, #self.blocks do
 		self.blocks[i]:setAlpha( a )
 	end

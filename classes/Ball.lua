@@ -32,7 +32,7 @@ function Ball:spawn( dx, dy, power )
 	-- Define Ball's collision filter:
 		-- Cat. 1: Ball
 		-- Collides with: 2 (blocks) + 4 (pickups)
-	physics.addBody( self.shape, 'dynamic', { filter = { categoryBits = 1, maskBits = 6 } } )
+	physics.addBody( self.shape, 'dynamic', { filter = { categoryBits = 1, maskBits = 14 } } )
 	self.shape.tag = 'ball'
 	self.shape.parentObject = self
 	self.shape:addEventListener( 'collision', onCollision )

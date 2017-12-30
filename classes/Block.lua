@@ -48,9 +48,8 @@ function Block:spawn( xPos )
 
 	-- Define Ball's collision filter:
 		-- Cat. 2: Block
-		-- Collides with: 1 (balls) + 4 (pickups)
-	physics.addBody( self.shape, 'kinematic', { filter = { categoryBits = 2, maskBits = 5 }, bounce = 1 } )
-	self.shape.gravityScale = 0
+		-- Collides with: 1 (balls) + 4 (pickups) + 2 (bottomWall)
+	physics.addBody( self.shape, 'kinematic', { filter = { categoryBits = 2, maskBits = 13 }, bounce = 1 } )
 	self.shape.tag = 'block'
 	self.shape.parentObject = self
 	self.shape:addEventListener( 'collision', onCollision )
@@ -89,8 +88,10 @@ end
 -- Function: Block:setAlpha
 -- Description: Used to show/hide the obj
 function Block:setAlpha( a )
-	self.shape.alpha = a
-	self.shapeHealth.alpha = a
+	if self.shape then
+		self.shape.alpha = a
+		self.shapeHealth.alpha = a
+	end
 end
 
 -- Function: Block:remove
