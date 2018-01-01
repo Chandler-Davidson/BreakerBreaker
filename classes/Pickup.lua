@@ -31,7 +31,7 @@ local function onCollision( event )
 			self:displayNotification()
 			self:remove()
 
-		elseif ( event.other.tag == 'block' ) then
+		elseif ( event.other.tag == 'block' or event.other.tag == 'pickup' ) then
 			-- We don't want lingering pickups, so if they collide remove self
 			print( '\t**Pickup removed, due to collision with block**' )
 			self:remove()
@@ -53,7 +53,7 @@ function Pickup:spawn( scene )
 	self.shape = display.newCircle( xPos, yPos, 15 )
 
 	self.shape:setFillColor( unpack( self.color ) )
-	self.shape.strokeWidth = 1
+	-- self.shape.strokeWidth = 1
 
 	-- Define Ball's collision filter:
 		-- Cat. 1: Pickup

@@ -13,7 +13,7 @@ function HUD:spawn(  )
 	roundCount = display.newText( {
 		parent = sceneGroup,
 		text = '0',
-		x = _W - 10, y = -15,
+		x = _W - 20, y = -15,
 		font = "kenvector_future_thin.ttf", 
 		fontSize = 30,
 		} )
@@ -21,7 +21,7 @@ function HUD:spawn(  )
 	bestCounter = display.newText( {
 		parent = sceneGroup,
 		text = "Best:  " .. highScore,
-		x = 70, y = -15,
+		x = 75, y = -15,
 		font = "kenvector_future_thin.ttf", 
 		fontSize = 30,
 		} )

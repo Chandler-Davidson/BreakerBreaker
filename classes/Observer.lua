@@ -28,35 +28,38 @@ end
 
 -- Function: Observer:spawnBlocks
 -- Description: Spawns the number of specified blocks
-function Observer:spawnBlocks( numBlocks, difficulty )
+function Observer:spawnBlocks( difficulty )
 	if inPlay then
 
-		print( '  Spawning Blocks:' )
+		-- First determin max. num of blocks
+		local numBlocks
+		if difficulty > 7 then 	-- Max of 7 blocks per row
+			numBlocks = 7
+		else
+			numBlocks = difficulty
+		end
 
-			-- Generate random, non repeating locations
-			local randNumbers = {}	-- Holds chosen locations 
-			local tempNum
+		-- Determine the actual number of blocks
+		numBlocks = math.random( numBlocks )
 
-			-- Decide a random location for each block
-			for i = 1, numBlocks do
+		local randNumbers = {}
+		local tempNum
 
-				repeat
-					tempNum = math.random( 1, 7 ) * 40
+		for i = 1, numBlocks do
+			-- Spaces 0 - 6 * (blockSize + padding) + padding between block and screen width
+			tempNum = math.random( 0, 6 ) * 43 + 30
 
-					if ( table.indexOf( randNumbers, tempNum ) == nil ) then
+			if ( table.indexOf( randNumbers, tempNum ) == nil ) then
+				-- Put new number into table
+				randNumbers[i] = tempNum
 
-						-- Put new number into table
-						randNumbers[i] = tempNum
-
-						-- Spawn a new block, then insert into table
-						local tempBlock = Block:new( { hitPoints = difficulty + math.random( 1, 5 ) } )
-						tempBlock:spawn( randNumbers[i] )
-						table.insert( self.blocks, tempBlock )
-
-					end
-
-				until randNumbers[i] ~= nil
+				-- Spawn a new block, then insert into table
+				local tempBlock = Block:new( { hitPoints = difficulty + math.random( 1, 5 ) } )
+				tempBlock:spawn( randNumbers[i] )
+				table.insert( self.blocks, tempBlock )
 			end
+ 		end
+		
 	else
 		inQueueSpawnNumBlocks = numBlocks
 		inQueueSpawnDifficulty = difficulty
@@ -65,25 +68,25 @@ function Observer:spawnBlocks( numBlocks, difficulty )
 end
 
 -- Function: Observer:spawnPickup
--- Description: Spawns an instance of the specficic pickup
-function Observer:spawnPickup( type )
-	local strNote
+-- Description: Spawns a random pickup
+function Observer:spawnPickup( )
+	local pickupType = math.random( 2 )
+	local tempPickup
 
-	if ( type == "Ball" ) then
-		strNote = "+1 Ball"
+	if ( pickupType == 1 ) then
+		tempPickup = Pickup:new( { pickupType = "Ball", color = { 98/255, 168/255, 229/255 }, notification = "+1 Ball" } )
 	else
-		strNote = "Boom!"
+		tempPickup = Pickup:new( { pickupType = "Shockwave", color = { 229/255, 105/255, 98/255 }, notification = "Boom" } )
 	end
-
-	local temp = Pickup:new( { pickupType = type, color = { 1, 0, 0 }, notification = strNote } )
 
 	if inPlay then
-		temp:spawn( self.scene )
-		table.insert( self.pickups, temp )
+		tempPickup:spawn( self.scene )
+		table.insert( self.pickups, tempPickup )
 	else
-		inQueuePickup = temp
+		inQueuePickup = tempPickup
 		holdingMove = true
 	end
+
 end
 
 -- Function: Observer:refactor
@@ -104,6 +107,12 @@ end
 -- Description: Moves all active blocks down
 function Observer:moveBlocks( )
 
+	-- Clean up blocks
+	self:refactor( self.blocks )
+
+	-- Clean up pickups, because...
+	self:refactor( self.pickups )
+
 	if inPlay then
 		-- Iterate through table
 		for i = 1, #self.blocks do
@@ -114,12 +123,6 @@ function Observer:moveBlocks( )
 				self.blocks[i] = nil
 			end
 		end
-
-		-- Clean up blocks
-		self:refactor( self.blocks )
-
-		-- Clean up pickups, because...
-		self:refactor( self.pickups )
 
 	else
 		holdingMove = true
@@ -143,7 +146,9 @@ function Observer:setAlpha( a )
 	self:refactor(self.pickups)
 
 	for i = 1, #self.blocks do
+		-- if ( self.blocks[i] ) then
 		self.blocks[i]:setAlpha( a )
+	-- end
 	end
 
 	for i = 1, #self.pickups do

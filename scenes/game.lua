@@ -10,7 +10,7 @@ local roundCount = 1 -- Track each wave's progression
 
 -- Only allow a single shot on screen at a time
 local ballsFired = 0;		-- ammoCount at time of release (ammoCount changes w/ pickups)
-local ballsReturned = 0		-- count of balls returned during shot, onCollision with bottomWall
+local ballsReturned = 0		-- count of balls returned during shot, onCollision with ballRetainer
 
 -- Function: startNewWave
 -- Description: Called to start each round, updating blocks and incrementing the round
@@ -24,18 +24,9 @@ local function startNewWave(  )
 	timer.performWithDelay( 10, function (  )
 		-- Short timer allows collision to end
 
-		local blockCount 	-- Defines how many blocks to spawn
-
-		if roundCount < 7 then
-			blockCount = roundCount
-		else
-			-- Only 7 blocks will fit on screen
-			blockCount = 7
-		end
-
-		Observer:spawnBlocks(blockCount, roundCount)
+		Observer:spawnBlocks(roundCount)
 		Observer:moveBlocks()
-		Observer:spawnPickup( "Ball" )
+		Observer:spawnPickup( )
 
 		roundCount = roundCount + 1
 	end )	
@@ -52,44 +43,66 @@ function scene:create( event )
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
 
 	-- ENVIROMENT --
+		-- BACKGROUND --
+		local background = display.newRect(sceneGroup, 0, 0, 570, 600)
+		background.fill = {
+			type = 'gradient',
+			color1 = { 0, 0, 0 },
+			color2 = { 55/255, 60/255, 70/255 } 
+		}
+			
+		background.x = _W / 2
+		background.y = _H / 2
+
 		-- Walls --
 		local leftWall = display.newRect( sceneGroup, -5, _CY, 10, _H + 100 )
 		local rightWall = display.newRect( sceneGroup, _W + 5, _CY, 10, _H + 100 )
 		local topWall = display.newRect( sceneGroup, _CX, -50, _W, 10 )
-		local bottomWall = display.newRect( sceneGroup, _CX, _H + 70, _W, 10 )
-
+		local ballRetainer = display.newRect( sceneGroup, _CX, _H + 70, _W, 10 )
+		local blockRetainer = display.newRoundedRect( sceneGroup, _CX, _H + 30, _W, 40, 5 )
+		blockRetainer:setFillColor( .8 )
+		
 		physics.addBody( leftWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( rightWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
 		physics.addBody( topWall, 'static', { bounce = 1, filter = { categoryBits = 2, maskBits = 1 } } )
-		physics.addBody( bottomWall, 'dynamic', { isSensor = true, filter = { categoryBits = 8, maskBits = 3 } } )
-		bottomWall.gravityScale = 0
+		physics.addBody( ballRetainer, 'dynamic', { isSensor = true, filter = { categoryBits = 8, maskBits = 1 } } )
+		physics.addBody( blockRetainer, 'dynamic', { isSensor = true, filer = { categoryBits = 16, maskBits = 2 } } )
+		ballRetainer.gravityScale = 0
+		blockRetainer.gravityScale = 0
 
-		bottomWall.tag = 'ballBounds'
+		ballRetainer.tag = 'ballBounds'
+
 
 		-- Collects all returning balls
-		local function ballListener( event )
-			if (event.other.tag == 'ball') then
+		local function ballRetainerListener( event )
+			if (event.phase == "began") then
+				if (event.other.tag == 'ball') then
 
-				ballsReturned = ballsReturned + 1
+					ballsReturned = ballsReturned + 1
 
-				-- Ensures all are collected before play
-				if (ballsReturned >= ballsFired) then
+					-- Ensures all are collected before play
+					if (ballsReturned >= ballsFired) then
 
-					ballsReturned = 0
-					Cannon:setReadyToFire( true );
+						ballsReturned = 0
+						Cannon:setReadyToFire( true );
 
-					-- Create new blocks
-					startNewWave()
+						-- Create new blocks
+						startNewWave()
+					end
 				end
+			end
+		end
 
-			elseif (event.other.tag == 'block') then
-				-- Error here, not colliding with block
+		-- Ends the game when a block reaches the bottom
+		local function blockRetainerListener( event )
+			if (event.other.tag == 'block') then
 				print( '**GAME OVER**' )
 				scene:gameOver()
 			end
 		end
 
-		bottomWall:addEventListener( 'collision', ballListener)
+		ballRetainer:addEventListener( 'collision', ballRetainerListener )
+		blockRetainer:addEventListener( 'collision', blockRetainerListener )
 
 	-- GAME OBJECTS --
 		-- Init the cannon

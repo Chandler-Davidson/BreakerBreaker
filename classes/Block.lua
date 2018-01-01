@@ -31,10 +31,20 @@ function Block:spawn( xPos )
 	-- local xPos = 1 * 40
 	print( '\tNew Block HP: ' .. self.hitPoints )
 
-	self.shape = display.newRect( xPos, 0, 40, 40 ) -- Main container
-	self.shape:setFillColor( 1, 0, 0 )
-	self.shape.strokeWidth = 5
-	self.shape:setStrokeColor( 0 ) -- Have seperation between blocks
+	--self.shape = display.newRect( xPos, 0, 40, 40 ) -- Main container
+	self.shape = display.newRoundedRect( xPos, 0, 40, 40, 5 )
+	
+	-- MAKE PRETTY --
+	-- 1. Change colors as number decreases
+	-- 2. Gradient?
+
+	-- self.shape:setFillColor( 1, 0, 0 )
+
+	local mult = 7
+	self.shape:setFillColor( (48 - (self.hitPoints * mult))/255, (244 - (self.hitPoints * mult * 2))/255, (176 - (self.hitPoints * mult))/255 )
+	
+	-- self.shape.strokeWidth = 5
+	-- self.shape:setStrokeColor( 0 ) -- Have seperation between blocks
 
 	self.shapeHealth = display.newText( { 	-- Number inside block
 		text = self.hitPoints,
@@ -75,14 +85,14 @@ end
 -- Description: Smoothly lower the block
 function Block:move(  )
 	transition.to( self.shape, {
-		y = self.shape.y + self.shape.height,
+		y = self.shape.y + self.shape.height + 3,
 		time = 300
 		} )
 
 	transition.to( self.shapeHealth, {
-		y = self.shapeHealth.y + self.shape.height,
+		y = self.shapeHealth.y + self.shape.height + 3,
 		time = 300
-		})
+		} )
 end
 
 -- Function: Block:setAlpha

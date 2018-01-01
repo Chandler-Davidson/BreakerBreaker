@@ -27,6 +27,7 @@ local function drawReticle( x, y )
 
 	-- Draw a line from the 'cannon' to the cursor
 	reticleLine = display.newLine( _CX, _CY + 250, x, y )
+	reticleLine.strokeWidth = 5
 end
 
 -- Function: removeReticle
