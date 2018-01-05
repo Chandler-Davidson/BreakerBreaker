@@ -8,7 +8,7 @@ composer.setVariable( 'ballSpeed', 5 )
 audio.setVolume( 1 )
 composer.setVariable( 'highScore', 5 )
 
-composer.gotoScene( 'scenes.leaderboard', { params = {score = 20 } } )
+composer.gotoScene( 'scenes.menu', { params = {score = 35 } } )
 
 
 -- TODO --

@@ -2,13 +2,36 @@ local composer = require('composer')
 
 local HUD = {}
 
+local json = require( "json" )
+local scoresTable = {}
+local filePath = system.pathForFile( "scores.json", system.DocumentsDirectory )
+
 local sceneGroup = display.newGroup( )
-local highScore = composer.getVariable( 'highScore' )
+local highScore
 local roundCount
 local bestCounter
 local ammoCounter
 
+local function loadScores()
+
+	local file = io.open( filePath, "r" )
+
+	if file then
+		local contents = file:read( "*a" )
+		io.close( file )
+		scoresTable = json.decode( contents )
+	end
+
+	if ( scoresTable == nil or #scoresTable == 0 ) then
+		scoresTable = { 0 }
+	end
+end
+
 function HUD:spawn(  )
+	loadScores()
+
+	highScore = scoresTable[1]
+
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
 
 	roundCount = display.newText( {

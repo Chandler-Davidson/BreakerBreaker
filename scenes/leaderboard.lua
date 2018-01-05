@@ -1,170 +1,213 @@
+local widget = require('widget')
 local composer = require( "composer" )
- 
+
 local scene = composer.newScene()
- 
+
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
-local json = require("json")
+
+-- Initialize variables
+local json = require( "json" )
+
 local scoresTable = {}
+
 local filePath = system.pathForFile( "scores.json", system.DocumentsDirectory )
 
 
-local scoresGroup
-local newScore
- 
+local function loadScores()
+
+	local file = io.open( filePath, "r" )
+
+	if file then
+		local contents = file:read( "*a" )
+		io.close( file )
+		scoresTable = json.decode( contents )
+	end
+
+	if ( scoresTable == nil or #scoresTable == 0 ) then
+		scoresTable = { 0 }
+	end
+end
+
+
+local function saveScores( lastScore )
+
+	if ( lastScore > scoresTable[1] ) then
+		scoresTable[1] = lastScore
+
+		local file = io.open( filePath, "w" )
+
+		if file then
+			file:write( json.encode( scoresTable ) )
+			io.close( file )
+		end
+
+		-- Return true that the new score was accepted
+		return true
+	end
+
+	return false
+end
+
+
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
 
-local function loadScores()
-    local file = io.open( filePath, "r" )
- 
-    if file then
-        local contents = file:read( "*a" )
-        io.close( file )
-        scoresTable = json.decode( contents )
-    end
- 
-    if ( scoresTable == nil or #scoresTable == 0 ) then
-        scoresTable = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-    end
-end
-
-local function saveScores()
-    for i = #scoresTable, 11, -1 do
-        table.remove( scoresTable, i )
-    end
- 
-    local file = io.open( filePath, "w" )
- 
-    if file then
-        file:write( json.encode( scoresTable ) )
-        io.close( file )
-    end
-end
- 
+-- create()
 function scene:create( event )
- 
-	local sceneGroup = self.view
 
-	newScore = event.params.score
+    local sceneGroup = self.view
 
-	loadScores()
+    -- Load the previous scores
+    loadScores()
+
+    -- Save the new score, store if the score is >
+    local newScore = saveScores( event.params.score )
+
+    local clickSound = audio.loadSound( 'sounds/kenney_uiaudio/Audio/click1.ogg' )
+	local switchSound = audio.loadSound( 'sounds/kenney_uiaudio/Audio/switch1.ogg' )
+
+	-- Commonly used coordinates
+	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
 
 	-- BACKGROUND --
+		-- Scene Background --
 		local background = display.newRect(sceneGroup, 0, 0, 570, 600)
 		background.fill = {
 			type = 'gradient',
-			color1 = { 0, 0, 0 },
-			color2 = { 55/255, 60/255, 70/255 } 
-		}
-			
-		background.x = display.contentWidth / 2
-		background.y = display.contentHeight / 2
+			color1 = { 8/255, 158/255, 0/255 },
+			color2 = { 104/255, 183/255, 95/255 } }
 
+		background.x = _W / 2
+		background.y = _H / 2
 
-	-- Scene title
-	local title = display.newText( {
+		-- Menu Background --
+		local menuBackground = display.newRoundedRect(sceneGroup, 0, 0, 250, 350, 12)
+		menuBackground:setFillColor( .9 )
+		menuBackground.strokeWidth = 2
+		menuBackground:setStrokeColor( 0.7 )
+		menuBackground.x = _W / 2
+		menuBackground.y = _H / 2 +20
+
+	-- TITLE --
+	local title = display.newText( { 
 		parent = sceneGroup,
-		text = "Leaderboard",
-		x = display.contentCenterX, y = 15,
-		font = "kenvector_future_thin.ttf",
-		fontSize = 35,
-		} )
+		x = _CX, y = 50,
+		text = "Game Over", 
+		font = "kenvector_future_thin.ttf", 
+		fontSize = 30,
+		align = 'center'} )
 
-	-- Ease in title
-	transition.from( title, { y = -150, time = 200, delay = 1500 } )
+	local newScoreText = display.newText( { 
+		parent = sceneGroup,
+		x = _CX + 3, y = 130,
+		width = display.contentWidth,
+		text = event.params.score, 
+		font = "kenvector_future_thin.ttf", 
+		fontSize = 50,
+		align = 'center'} )
 
-	-- Draw name + scores in table
-	scoresGroup = display.newGroup( )
-	scoresGroup.x, scoresGroup.y = display.contentCenterX, 50
+	local bestText = display.newText( { 
+		parent = sceneGroup,
+		x = _CX, y = 180,
+		text = "Best: " .. scoresTable[1], 
+		font = "kenvector_future_thin.ttf", 
+		fontSize = 30,
+		align = 'center'} )
 
-	-- Draw dynamically
-	for i = 1, 10 do
-		local name = display.newText( {
-			parent = scoresGroup,
-			text = "name",
-			x = -55, y = 35 * i,
-			width = 180, align = 'left',
-			font = "kenvector_future_thin.ttf",
-			fontSize = 30,} )
+	-- EXIT BUTTONS --
+		-- Accept Button --
+		local acceptButton = widget.newButton( {
+			defaultFile = 'uipack_fixed/PNG/green_button01.png',
+			overFile = 'uipack_fixed/PNG/green_button02.png',
+			label = '  Play Again', labelColor = { default = {1, 1, 1} },
+			font = 'kenvector_future_thin.ttf',
+			width = 150, height = 40,
+			x = 195, y = _H -90,
+			onRelease = function ( )
+				audio.play( clickSound )
 
-		local score = display.newText( {
-			parent = scoresGroup,
-			text = "000",
-			x = 120, y = 35 * i,
-			width = 65, align = 'right',
-			font = "kenvector_future_thin.ttf", 
-			fontSize = 30,} )
+				-- Return to the appropriate scene
+				composer.gotoScene( 'scenes.game', { time = 200, effect = 'slideRight' } )
 
-		-- Ease in both
-		transition.from( name, { y = -150, time = 200, delay = 100 * i } )
-		transition.from( score, { y = -150, time = 200, delay = 100 * i } )
-	end
+			end } )
+			sceneGroup:insert( acceptButton )
+
+		-- Back Button --
+		local backButton = widget.newButton( {
+			defaultFile = 'uipack_fixed/PNG/green_boxCross.png',
+			width = 40, height = 40,
+			x = 70, y = _H -90,
+			onRelease = function ( )
+				audio.play( clickSound )
+				
+				-- Return to the appropriate scene
+				composer.gotoScene( 'scenes.menu', { time = 200, effect = 'slideRight' } )
+			end } )
+			sceneGroup:insert( backButton )
+
+		-- Donate Button --
+		local donateButton = widget.newButton( {
+			defaultFile = 'uipack_fixed/PNG/blue_button01.png',
+			overFile = 'uipack_fixed/PNG/blue_button02.png',
+			label = '  Donate', labelColor = { default = {1, 1, 1} },
+			font = 'kenvector_future_thin.ttf',
+			width = 150, height = 40,
+			x = _CX, y = _H - 190,
+			onRelease = function ( )
+				audio.play( clickSound )
+				
+				-- Return to the appropriate scene
+				system.openURL( "http://www.chandlerdavidson.com" )
+			end } )
+			sceneGroup:insert( donateButton )
 end
- 
- 
+
+
+-- show()
 function scene:show( event )
- 
+
 	local sceneGroup = self.view
 	local phase = event.phase
- 
+
 	if ( phase == "will" ) then
+		-- Code here runs when the scene is still off screen (but is about to come on screen)
 
-		table.insert( scoresTable, { composer.getVariable( 'playerName' ), newHighScore } )
-
-		-- Sort from high to low
-		local function compare( a, b )
-    		return a[2] > b[2]  -- Note ">" as the operator
-		end
- 
-		table.sort( scoresTable, compare )
-
-		saveScores()
-
-		-- Change out displayObject's text from table
-		local tCount = 1;
-		for i = 1, #scoresTable * 2, 2 do
-			scoresGroup[i].text = scoresTable[tCount][1]
-			scoresGroup[i+1].text = scoresTable[tCount][2]
-			tCount = tCount + 1
-		end
- 
 	elseif ( phase == "did" ) then
-
-		-- Possibly add blinking score
+		-- Code here runs when the scene is entirely on screen
 
 	end
 end
- 
- 
+
+
 -- hide()
 function scene:hide( event )
- 
+
 	local sceneGroup = self.view
 	local phase = event.phase
- 
+
 	if ( phase == "will" ) then
 		-- Code here runs when the scene is on screen (but is about to go off screen)
- 
+
 	elseif ( phase == "did" ) then
 		-- Code here runs immediately after the scene goes entirely off screen
- 
+		composer.removeScene( "highscores" )
 	end
 end
- 
- 
+
+
 -- destroy()
 function scene:destroy( event )
- 
+
 	local sceneGroup = self.view
 	-- Code here runs prior to the removal of scene's view
- 
+
 end
- 
- 
+
+
 -- -----------------------------------------------------------------------------------
 -- Scene event function listeners
 -- -----------------------------------------------------------------------------------
@@ -173,5 +216,5 @@ scene:addEventListener( "show", scene )
 scene:addEventListener( "hide", scene )
 scene:addEventListener( "destroy", scene )
 -- -----------------------------------------------------------------------------------
- 
+
 return scene
