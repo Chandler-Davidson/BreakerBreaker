@@ -116,6 +116,10 @@ function Cannon:addAmmo( ammo )
 	print( '\tNew ammoCount: ' .. ammoCount )
 end
 
+function Cannon:getAmmo(  )
+	return ammoCount
+end
+
 -- Function: setListening
 -- Description: enable/disable cannon based upon game scene's current state
 function Cannon:setListening( state )

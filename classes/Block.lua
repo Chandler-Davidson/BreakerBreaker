@@ -33,18 +33,7 @@ function Block:spawn( xPos )
 
 	--self.shape = display.newRect( xPos, 0, 40, 40 ) -- Main container
 	self.shape = display.newRoundedRect( xPos, 0, 40, 40, 5 )
-	
-	-- MAKE PRETTY --
-	-- 1. Change colors as number decreases
-	-- 2. Gradient?
-
-	-- self.shape:setFillColor( 1, 0, 0 )
-
-	local mult = 7
-	self.shape:setFillColor( (48 - (self.hitPoints * mult))/255, (244 - (self.hitPoints * mult * 2))/255, (176 - (self.hitPoints * mult))/255 )
-	
-	-- self.shape.strokeWidth = 5
-	-- self.shape:setStrokeColor( 0 ) -- Have seperation between blocks
+	self.shape:setFillColor( self:getColor() )
 
 	self.shapeHealth = display.newText( { 	-- Number inside block
 		text = self.hitPoints,
@@ -76,9 +65,21 @@ function Block:hit( hp )
 		-- Delete block
 		self:remove( )
 	else
-		-- Update HP
-		self.shapeHealth.text = self.hitPoints
+		self.shapeHealth.text = self.hitPoints			-- Update HP
+		self.shape:setFillColor( self:getColor() )		-- Update color
 	end
+end
+
+function Block:getColor( )
+	local mult = 7
+	local hp = self.hitPoints
+
+	local r, b, g
+	r = (48 - (hp * mult))/255
+	b = (244 - (hp * mult * 2))/255
+	g = (176 - (hp * mult))/255
+
+	return r, b, g
 end
 
 -- Function: Block:move

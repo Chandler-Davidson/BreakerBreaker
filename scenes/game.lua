@@ -114,14 +114,13 @@ function scene:create( event )
 
 		HUD:spawn()
 
+		-- timer.performWithDelay( 700, function (  )
+		-- 	startNewWave()
+		-- end, 8 )
 		startNewWave()
 end
 
 function scene:gameOver(  )
-	if (roundCount > composer.getVariable('highScore')) then
-		composer.setVariable( 'highScore', roundCount )
-	end
-
 	composer.gotoScene( 'scenes.leaderboard', {time = 200, effect = 'slideRight', params = {score = roundCount}} )
 end
 
@@ -141,6 +140,7 @@ function scene:applyPickup( pickupType )
 	-- Apply game logic on pickup's desc.
 	if pickupType == 'Ball' then
 		Cannon:addAmmo( 1 )
+		HUD:setAmmo( Cannon:getAmmo() )
 
 	elseif pickupType == 'Shockwave' then
 		Observer:hitAll(1)

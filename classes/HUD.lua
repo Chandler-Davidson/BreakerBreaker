@@ -6,6 +6,7 @@ local sceneGroup = display.newGroup( )
 local highScore = composer.getVariable( 'highScore' )
 local roundCount
 local bestCounter
+local ammoCounter
 
 function HUD:spawn(  )
 	local _W, _H, _CX, _CY = display.contentWidth, display.contentHeight, display.contentCenterX, display.contentCenterY
@@ -25,6 +26,14 @@ function HUD:spawn(  )
 		font = "kenvector_future_thin.ttf", 
 		fontSize = 30,
 		} )
+
+	ammoCounter = display.newText( {
+		parent = sceneGroup,
+		text = "Ammo: 1",
+		x = _W - 50, y = _H,
+		font = "kenvector_future_thin.ttf",
+		fontSize = 20
+		} )
 end
 
 function HUD:newRound(  )
@@ -35,9 +44,14 @@ function HUD:newRound(  )
 	end
 end
 
+function HUD:setAmmo( a )
+	ammoCounter.text = "Ammo: " .. a
+end
+
 function HUD:setActive( a )
 	roundCount.alpha = a
 	bestCounter.alpha = a
+	ammoCounter.alpha = a
 end
 
 function HUD:remove(  )

@@ -146,9 +146,9 @@ function Observer:setAlpha( a )
 	self:refactor(self.pickups)
 
 	for i = 1, #self.blocks do
-		-- if ( self.blocks[i] ) then
-		self.blocks[i]:setAlpha( a )
-	-- end
+		if ( self.blocks[i] ) then
+			self.blocks[i]:setAlpha( a )
+		end
 	end
 
 	for i = 1, #self.pickups do

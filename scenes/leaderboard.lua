@@ -6,20 +6,63 @@ local scene = composer.newScene()
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
+local json = require("json")
+local scoresTable = {}
+local filePath = system.pathForFile( "scores.json", system.DocumentsDirectory )
+
 
 local scoresGroup
-local newHighScore
+local newScore
  
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
+
+local function loadScores()
+    local file = io.open( filePath, "r" )
  
--- create()
+    if file then
+        local contents = file:read( "*a" )
+        io.close( file )
+        scoresTable = json.decode( contents )
+    end
+ 
+    if ( scoresTable == nil or #scoresTable == 0 ) then
+        scoresTable = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    end
+end
+
+local function saveScores()
+    for i = #scoresTable, 11, -1 do
+        table.remove( scoresTable, i )
+    end
+ 
+    local file = io.open( filePath, "w" )
+ 
+    if file then
+        file:write( json.encode( scoresTable ) )
+        io.close( file )
+    end
+end
+ 
 function scene:create( event )
  
 	local sceneGroup = self.view
 
-	newHighScore = event.params.score
+	newScore = event.params.score
+
+	loadScores()
+
+	-- BACKGROUND --
+		local background = display.newRect(sceneGroup, 0, 0, 570, 600)
+		background.fill = {
+			type = 'gradient',
+			color1 = { 0, 0, 0 },
+			color2 = { 55/255, 60/255, 70/255 } 
+		}
+			
+		background.x = display.contentWidth / 2
+		background.y = display.contentHeight / 2
 
 
 	-- Scene title
@@ -60,8 +103,6 @@ function scene:create( event )
 		transition.from( name, { y = -150, time = 200, delay = 100 * i } )
 		transition.from( score, { y = -150, time = 200, delay = 100 * i } )
 	end
-
-	
 end
  
  
@@ -72,23 +113,22 @@ function scene:show( event )
  
 	if ( phase == "will" ) then
 
-		-- local names = load from memory
-		local t = { {'chandler', 325}, {'megan', 25}, {'chris', 666}, {'carolyn', 2} }
-
-		table.insert( t, { composer.getVariable( 'playerName' ), newHighScore } )
+		table.insert( scoresTable, { composer.getVariable( 'playerName' ), newHighScore } )
 
 		-- Sort from high to low
 		local function compare( a, b )
     		return a[2] > b[2]  -- Note ">" as the operator
 		end
  
-		table.sort( t, compare )
+		table.sort( scoresTable, compare )
+
+		saveScores()
 
 		-- Change out displayObject's text from table
 		local tCount = 1;
-		for i = 1, #t * 2, 2 do
-			scoresGroup[i].text = t[tCount][1]
-			scoresGroup[i+1].text = t[tCount][2]
+		for i = 1, #scoresTable * 2, 2 do
+			scoresGroup[i].text = scoresTable[tCount][1]
+			scoresGroup[i+1].text = scoresTable[tCount][2]
 			tCount = tCount + 1
 		end
  
