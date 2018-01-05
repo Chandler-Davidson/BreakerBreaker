@@ -2,13 +2,47 @@ display.setStatusBar(display.HiddenStatusBar)
 
 local composer = require('composer')
 
--- Define initial game settings as globals --
-composer.setVariable( 'playerName', 'PLAYER' )
-composer.setVariable( 'ballSpeed', 5 )
-audio.setVolume( 1 )
-composer.setVariable( 'highScore', 5 )
+-- local json = require('json')
+-- local settingsTable = {}
+-- local scoreTable = {}
 
-composer.gotoScene( 'scenes.menu', { params = {score = 35 } } )
+-- local function loadSettings( path )	
+-- 	local filePath = system.pathForFile( path, system.DocumentsDirectory )
+-- 	local file = io.open( filePath, 'r' )
+
+-- 	if file then
+-- 		local contents = file:read( '*a' )
+-- 		io.close( file )
+
+-- 		if (path == "settings.json") then
+-- 			settingsTable = json.decode( contents )
+-- 		elseif (path == "scores.json") then
+-- 			scoreTable = json.decode( contents )
+-- 		end
+
+-- 	end
+
+-- 	if ( settingsTable == nil or #settingsTable == 0 ) then
+-- 		settingsTable = { name = "PLAYER", sound = 1, ballSpeed = 5 }
+-- 	end
+
+-- 	if ( scoreTable == nil or #scoreTable == 0) then
+-- 		scoreTable = { 0 }
+-- 	end
+
+-- 	-- Define initial game settings as globals --
+-- 	composer.setVariable( 'playerName', settingsTable.name )
+-- 	composer.setVariable( 'ballSpeed', settingsTable.ballSpeed )
+-- 	audio.setVolume( settingsTable.sound )
+-- 	composer.setVariable( 'highScore', scoreTable[1] )
+-- end
+
+-- 	print(settingsTable['playerName'])
+
+-- loadSettings( "settings.json" )
+-- loadSettings( "scores.json" )
+
+composer.gotoScene( 'scenes.menu' )
 
 
 -- TODO --

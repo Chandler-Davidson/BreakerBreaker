@@ -1,9 +1,22 @@
 composer = require('composer')
 local scene = composer.newScene()
 local widget = require('widget')
+local json = require('json')
+
+local settingsTable = {}
+local filePath = system.pathForFile( "settings.json", system.DocumentsDirectory )
 
 -- Display group used to clear text upon removal of scene
 local textGroup
+
+local function saveSettings(  )
+	local file = io.open( filePath, "w" )
+
+	if file then
+		file:write( json.encode( settingsTable ) )
+		io.close( file )
+	end
+end
  
 function scene:create( event )
 	local sceneGroup = self.view
@@ -223,9 +236,16 @@ function scene:create( event )
 				audio.play( clickSound )
 
 				-- Set all of the game settings
+				settingsTable.name = string.upper( self.nameField.text )
 				composer.setVariable( 'playerName', string.upper( self.nameField.text ) )
+				
+				settingsTable.audio = self.audioSwitch.isOn and 1 or 0
 				audio.setVolume( self.audioSwitch.isOn and 1 or 0 )
+				
+				settingsTable.ballSpeed = math.floor(self.slider.value / 10)
 				composer.setVariable( 'ballSpeed', math.floor (self.slider.value / 10))
+
+				saveSettings()
 
 				-- Return to the appropriate scene
 				composer.gotoScene( event.params.sceneFrom, { time = 200, effect = 'slideRight' } )
