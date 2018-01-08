@@ -18,8 +18,8 @@ function scene:create( event )
 	local background = display.newRect(sceneGroup, 0, 0, 570, 600)
 	background.fill = {
 		type = 'gradient',
-		color1 = { 22/255, 110/255, 252/255 },
-		color2 = { 135/255, 181/255, 255/255 } }
+		color1 = { 0/255, 72/255, 81/255 },
+		color2 = { 22/255, 195/255, 136/255 } }
 		
 	background.x = _W / 2
 	background.y = _H / 2
@@ -75,13 +75,13 @@ function scene:create( event )
 	-- Start the game, using a smooth transition
 	self.playButton = widget.newButton( {
 		parent = sceneGroup,
-		defaultFile = 'uipack_fixed/PNG/blue_button04.png',
-		overFile = 'uipack_fixed/PNG/blue_button02.png',
+		defaultFile = 'uipack_fixed/PNG/grey_button04.png',
+		overFile = 'uipack_fixed/PNG/grey_button02.png',
 		width = 120, height = 60,
 		x = _CX, y = _CY,
 		label = ' Play!', labelAlign = 'center',
 		font = 'kenvector_future_thin.ttf', fontSize = 20,
-		labelColor = { default={ 1, 1, 1 }, over={ 0, 0, 0, 0.5 } },
+		labelColor = { default={ .1, .1, .1 }, over={ 1, 1, 1, 0.5 } },
 		onRelease = function ( )
 			audio.play( clickSound )
 			composer.gotoScene( 'scenes.game', {time = 200, effect = 'slideRight'} )
@@ -93,16 +93,16 @@ function scene:create( event )
 	-- Change settings, using a smooth transition
 	self.optionsButton = widget.newButton( {
 		parent = sceneGroup,
-		defaultFile = 'uipack_fixed/PNG/blue_button04.png',
-		overFile = 'uipack_fixed/PNG/blue_button02.png',
+		defaultFile = 'uipack_fixed/PNG/grey_button04.png',
+		overFile = 'uipack_fixed/PNG/grey_button02.png',
 		width = 130, height = 60,
 		x = _CX, y = _CY + 100,
 		label = ' Options', labelAlign = 'center',
 		font = 'kenvector_future_thin.ttf', fontSize = 20,
-		labelColor = { default={ 1, 1, 1 }, over={ 0, 0, 0, 0.5 } },
+		labelColor = { default={ .1, .1, .1 }, over={ 1, 1, 1, 0.5 } },
 		onRelease = function ( )
 			audio.play( clickSound )
-			composer.gotoScene( 'scenes.options', {time = 500, effect = 'slideUp', params = { sceneFrom = 'scenes.menu' } })
+			composer.gotoScene( 'scenes.options', {time = 150, effect = 'fade', params = { sceneFrom = 'scenes.menu' } })
 		end } )
 	sceneGroup:insert( self.optionsButton )
 end

@@ -69,7 +69,6 @@ function scene:create( event )
 		physics.addBody( blockRetainer, 'dynamic', { isSensor = true, filer = { categoryBits = 16, maskBits = 2 } } )
 		ballRetainer.gravityScale = 0
 		blockRetainer.gravityScale = 0
-
 		ballRetainer.tag = 'ballBounds'
 
 

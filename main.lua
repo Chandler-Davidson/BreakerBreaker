@@ -2,45 +2,48 @@ display.setStatusBar(display.HiddenStatusBar)
 
 local composer = require('composer')
 
--- local json = require('json')
--- local settingsTable = {}
--- local scoreTable = {}
+local json = require('json')
+local settingsTable = {}
+local scoreTable = {}
 
--- local function loadSettings( path )	
--- 	local filePath = system.pathForFile( path, system.DocumentsDirectory )
--- 	local file = io.open( filePath, 'r' )
+-- Load json table from memory
+local function loadFromFile( path )	
+	local filePath = system.pathForFile( path, system.DocumentsDirectory )
+	local file = io.open( filePath, 'r' )
 
--- 	if file then
--- 		local contents = file:read( '*a' )
--- 		io.close( file )
+	if file then
+		local contents = file:read( '*a' )
+		io.close( file )
 
--- 		if (path == "settings.json") then
--- 			settingsTable = json.decode( contents )
--- 		elseif (path == "scores.json") then
--- 			scoreTable = json.decode( contents )
--- 		end
+		return json.decode( contents )
+	end
 
--- 	end
+	return {}
+end
 
--- 	if ( settingsTable == nil or #settingsTable == 0 ) then
--- 		settingsTable = { name = "PLAYER", sound = 1, ballSpeed = 5 }
--- 	end
+-- Check if files exist, otherwise fill in as default
+local function checkFile(  )
+	if ( settingsTable == nil or #settingsTable == 0 ) then
+		settingsTable = { "PLAYER", 1, 5 }
+	end
 
--- 	if ( scoreTable == nil or #scoreTable == 0) then
--- 		scoreTable = { 0 }
--- 	end
+	if ( scoreTable == nil or #scoreTable == 0 ) then
+		scoreTable = { 0 }
+	end
+end
 
--- 	-- Define initial game settings as globals --
--- 	composer.setVariable( 'playerName', settingsTable.name )
--- 	composer.setVariable( 'ballSpeed', settingsTable.ballSpeed )
--- 	audio.setVolume( settingsTable.sound )
--- 	composer.setVariable( 'highScore', scoreTable[1] )
--- end
+-- Check if files are valid
+checkFile()
 
--- 	print(settingsTable['playerName'])
+-- Load settings and scores
+settingsTable = loadFromFile( "settings.json" )
+scoreTable = loadFromFile( "scores.json" )
 
--- loadSettings( "settings.json" )
--- loadSettings( "scores.json" )
+-- Define game settings as globals --
+composer.setVariable( 'playerName', settingsTable[1] )
+audio.setVolume( settingsTable[2] )
+composer.setVariable( 'ballSpeed', settingsTable[3] )
+composer.setVariable( 'highScore', scoreTable[1] )
 
 composer.gotoScene( 'scenes.menu' )
 

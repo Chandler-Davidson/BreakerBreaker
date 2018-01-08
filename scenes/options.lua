@@ -3,12 +3,13 @@ local scene = composer.newScene()
 local widget = require('widget')
 local json = require('json')
 
-local settingsTable = {}
-local filePath = system.pathForFile( "settings.json", system.DocumentsDirectory )
-
 -- Display group used to clear text upon removal of scene
 local textGroup
 
+local settingsTable = {}
+local filePath = system.pathForFile( "settings.json", system.DocumentsDirectory )
+
+-- Function used for saving the game settings to file
 local function saveSettings(  )
 	local file = io.open( filePath, "w" )
 
@@ -32,8 +33,8 @@ function scene:create( event )
 		local background = display.newRect(sceneGroup, 0, 0, 570, 600)
 		background.fill = {
 			type = 'gradient',
-			color1 = { 8/255, 158/255, 0/255 },
-			color2 = { 104/255, 183/255, 95/255 } }
+			color1 = { 0/255, 72/255, 81/255 },
+			color2 = { 22/255, 195/255, 136/255 } }
 
 		background.x = _W / 2
 		background.y = _H / 2
@@ -138,8 +139,8 @@ function scene:create( event )
 		  	soundOffLabel:setFillColor(.5, .5, .5)
 
 		-- Sensitivity Slider --
-			sliderCurrentValue = display.newText( sceneGroup, '5', display.contentCenterX + 2, display.contentCenterY + 90, 'kenvector_future_thin.ttf', 20 )
-			sliderCurrentValue:setFillColor(.5, .5, .5)
+			self.sliderCurrentValue = display.newText( sceneGroup, '5', display.contentCenterX + 2, display.contentCenterY + 90, 'kenvector_future_thin.ttf', 20 )
+			self.sliderCurrentValue:setFillColor(.5, .5, .5)
 
 			local sliderOptions = 
 			{
@@ -235,14 +236,14 @@ function scene:create( event )
 			onRelease = function ( )
 				audio.play( clickSound )
 
+				-- Save all of the settings
+				settingsTable[1] = string.upper( self.nameField.text )
+				settingsTable[2] = self.audioSwitch.isOn and 1 or 0
+				settingsTable[3] = math.floor(self.slider.value / 10)
+
 				-- Set all of the game settings
-				settingsTable.name = string.upper( self.nameField.text )
 				composer.setVariable( 'playerName', string.upper( self.nameField.text ) )
-				
-				settingsTable.audio = self.audioSwitch.isOn and 1 or 0
 				audio.setVolume( self.audioSwitch.isOn and 1 or 0 )
-				
-				settingsTable.ballSpeed = math.floor(self.slider.value / 10)
 				composer.setVariable( 'ballSpeed', math.floor (self.slider.value / 10))
 
 				saveSettings()
@@ -267,19 +268,19 @@ function scene:create( event )
 			sceneGroup:insert( self.backButton )
 end
 
-function scene:show( event )
- 
+function scene:show( event ) 
 	local sceneGroup = self.view
 	local phase = event.phase
 
 	if ( phase == "will" ) then
 
-	elseif ( phase == "did" ) then
-
-		-- Fill in fields from memory
-		self.slider.value = composer.getVariable( 'ballSpeed' ) * 10
+		-- Fill in fields from globals
+		self.slider:setValue( composer.getVariable( 'ballSpeed' ) * 10 )
+		self.sliderCurrentValue.text = composer.getVariable( 'ballSpeed' )
 		self.nameField.text = composer.getVariable( 'playerName' )
-		self.audioSwitch.value = audio.getVolume( ) == 0 and false or true
+		self.audioSwitch:setState( { isOn = audio.getVolume( ) == 1 and true or false } )
+
+	elseif ( phase == "did" ) then
 	
 	end
 end
